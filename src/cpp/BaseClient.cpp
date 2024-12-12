@@ -39,7 +39,7 @@ void BaseClient::pullMessageFrom(const char *message, const bool &checkId) {
         }
 
         if (hasNoIncome) {
-            pushPullingResponse(hashCode, "message has no modifications");
+            pushMessage();
         } else {
             if (hasModes) {
                 portHandler.pullModes();
