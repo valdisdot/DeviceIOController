@@ -3,7 +3,7 @@
  * @brief Defines a base class for clients to handle message processing and communication.
  *
  * This header file declares the `BaseClient` class, which provides an abstract base for
- * implementing specific client functionality. It includes methods for processing incoming 
+ * implementing specific client functionality. It includes methods for processing incoming
  * messages, sending responses, and managing initialization.
  */
 
@@ -11,29 +11,30 @@
 #define BASE_CLIENT_H
 
 #include <ArduinoJson.h>
-#include "controller/ControllerHandler.h"
-#include "storage/InternalStorage.h"
+
 #include "constant/JsonSchema.h"
-#include "port/PortHandler.h"
-#include "task/TaskHandler.h"
-#include "task/ControllerTasks.h"
 #include "constant/TaskConstants.h"
+#include "controller/ControllerHandler.h"
+#include "port/PortHandler.h"
+#include "storage/InternalStorage.h"
+#include "task/ControllerTasks.h"
+#include "task/TaskHandler.h"
 
 /**
  * @class BaseClient
  * @brief Abstract base class for clients handling message processing and communication.
  *
  * The `BaseClient` class provides a framework for managing incoming and outgoing messages.
- * Derived classes must implement initialization, message sending, and response handling 
+ * Derived classes must implement initialization, message sending, and response handling
  * for their specific I/O interfaces.
  */
 class BaseClient {
    protected:
-    JsonDocument *dataExchangeJson;               /**< Pointer to the JSON document used for data exchange. */
-    const JsonSchema &jsonSchema;                  /**< Instance of JsonSchema for field name management. */
-    InternalStorage &storage;                      /**< Instance of InternalStorage for ROM memory interaction. */
-    ControllerHandler &controllerHandler;          /**< Instance of ControllerHandler for controller operations. */
-    PortHandler &portHandler;                      /**< Instance of PortHandler for managing port states and modes. */
+    JsonDocument *dataExchangeJson;       /**< Pointer to the JSON document used for data exchange. */
+    const JsonSchema &jsonSchema;         /**< Instance of JsonSchema for field name management. */
+    InternalStorage &storage;             /**< Instance of InternalStorage for ROM memory interaction. */
+    ControllerHandler &controllerHandler; /**< Instance of ControllerHandler for controller operations. */
+    PortHandler &portHandler;             /**< Instance of PortHandler for managing port states and modes. */
     const TaskConstants &taskConstants;
     TaskHandler &taskHandler;
 
@@ -76,15 +77,20 @@ class BaseClient {
     BaseClient(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, const TaskConstants &taskConstants, TaskHandler &taskHandler);
 
     /**
+     * @brief Abstract method to send data to the outside world.
+     */
+    virtual void pushMessage() = 0;
+
+    /**
      * @brief Abstract method to initialize the client.
      * @return Boolean indicating whether initialization was successful.
      */
     virtual bool initialize() = 0;
 
     /**
-     * @brief Abstract method to send data manually.
+     * @brief Abstract method to run the client ones. Method with be used in related task to handle the execution.
      */
-    virtual void pushMessage() = 0;
+    virtual void run() = 0;
 };
 
 #endif
