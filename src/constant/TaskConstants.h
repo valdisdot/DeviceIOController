@@ -34,7 +34,8 @@ struct TaskConstants {
     // Task handler configurations
     const int HANDLER_GC_INTERVAL = 60000;        /**< Garbage collection interval for the task handler, in milliseconds. */
     const int HANDLER_HOLDER_SIZE = 30;           /**< Maximum number of tasks held by the handler. */
-    const int HANDLER_ACTIVE_CORE = 1;            /**< Active core for task execution. */
+    const int MAIN_CORE = 0;                      /**< Active core for main task execution. */
+    const int BACKGROUND_CORE = 1;                /**< Active core for backgroung task execution. */
 
     // Task priorities
     const int PRIOTITY_NOW = 32;                  /**< Priority level for immediate execution. */
