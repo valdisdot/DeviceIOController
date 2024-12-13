@@ -15,6 +15,9 @@
 #include "InternalStorage.h"
 #include "JsonSchema.h"
 #include "PortHandler.h"
+#include "TaskHandler.h"
+#include "ControllerTasks.h"
+#include "TaskConstants.h"
 
 /**
  * @class BaseClient
@@ -27,10 +30,12 @@
 class BaseClient {
    protected:
     JsonDocument *dataExchangeJson;               /**< Pointer to the JSON document used for data exchange. */
-    JsonSchema jsonSchema;                        /**< Instance of JsonSchema for field name management. */
-    InternalStorage storage;                      /**< Instance of InternalStorage for ROM memory interaction. */
-    ControllerHandler controllerHandler;          /**< Instance of ControllerHandler for controller operations. */
-    PortHandler portHandler;                      /**< Instance of PortHandler for managing port states and modes. */
+    const JsonSchema &jsonSchema;                  /**< Instance of JsonSchema for field name management. */
+    InternalStorage &storage;                      /**< Instance of InternalStorage for ROM memory interaction. */
+    ControllerHandler &controllerHandler;          /**< Instance of ControllerHandler for controller operations. */
+    PortHandler &portHandler;                      /**< Instance of PortHandler for managing port states and modes. */
+    const TaskConstants &taskConstants;
+    TaskHandler &taskHandler;
 
     /**
      * @brief Processes an incoming message from a JSON string.
@@ -68,7 +73,7 @@ class BaseClient {
      * @param controllerHandler Reference to a ControllerHandler object for controller operations.
      * @param portHandler Reference to a PortHandler object for managing port states and modes.
      */
-    BaseClient(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler);
+    BaseClient(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, const TaskConstants &taskConstants, TaskHandler &taskHandler);
 
     /**
      * @brief Abstract method to initialize the client.

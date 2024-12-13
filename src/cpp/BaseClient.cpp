@@ -1,7 +1,7 @@
 #include "BaseClient.h"
 
-BaseClient::BaseClient(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler)
-    : dataExchangeJson(dataExchangeJson), jsonSchema(jsonSchema), storage(storage), controllerHandler(controllerHandler), portHandler(portHandler) {}
+BaseClient::BaseClient(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, const TaskConstants &taskConstants, TaskHandler &taskHandler)
+    : dataExchangeJson(dataExchangeJson), jsonSchema(jsonSchema), storage(storage), controllerHandler(controllerHandler), portHandler(portHandler), taskConstants(taskConstants), taskHandler(taskHandler) {}
 
 void BaseClient::pullMessageFrom(const char *message, const bool &checkId) {
     int hashCode = pulledMessageHashCodeFrom(message);
@@ -17,43 +17,22 @@ void BaseClient::pullMessageFrom(const char *message, const bool &checkId) {
             }
         }
 
-        bool hasNoIncome = true;
-        bool hasModes = false;
-        bool hasIncomingState = false;
-        bool hasConfiguration = false;
-
         if (jsonMessage[jsonSchema.MODES_WORD].is<JsonObject>()) {
             (*dataExchangeJson)[jsonSchema.MODES_WORD] = jsonMessage[jsonSchema.MODES_WORD].as<JsonObject>();
-            hasModes = true;
-            hasNoIncome = false;
+            portHandler.pullModes();
+            storage.saveModes();
         }
         if (jsonMessage[jsonSchema.STATE_WORD].is<JsonObject>()) {
             (*dataExchangeJson)[jsonSchema.STATE_WORD] = jsonMessage[jsonSchema.STATE_WORD].as<JsonObject>();
-            hasIncomingState = true;
-            hasNoIncome = false;
+            portHandler.pullState();
+            storage.saveState();
         }
         if (jsonMessage[jsonSchema.CONFIG_WORD].is<JsonObject>()) {
             (*dataExchangeJson)[jsonSchema.CONFIG_WORD] = jsonMessage[jsonSchema.CONFIG_WORD].as<JsonObject>();
-            hasConfiguration = true;
-            hasNoIncome = false;
+            storage.readConfiguration();
+            controllerHandler.reboot();
         }
-
-        if (hasNoIncome) {
-            pushMessage();
-        } else {
-            if (hasModes) {
-                portHandler.pullModes();
-                storage.saveModes();
-            }
-            if (hasIncomingState) {
-                portHandler.pullState();
-                storage.saveState();
-            }
-            if (hasConfiguration) {
-                storage.readConfiguration();
-                controllerHandler.reboot();
-            }
-        }
+        pushMessage();
     } else if (error == DeserializationError::EmptyInput)
         pushPullingResponse(hashCode, "message is empty");
     else if (error == DeserializationError::IncompleteInput)
