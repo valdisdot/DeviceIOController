@@ -1,4 +1,4 @@
-#include "PortHandler.h"
+#include "port/PortHandler.h"
 
 PortHandler::PortHandler(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, const ControllerConstants &constants) : dataExchangeJson(dataExchangeJson), jsonSchema(jsonSchema), constants(constants) {
     currentState = new int[constants.LAST_PORT + 1];

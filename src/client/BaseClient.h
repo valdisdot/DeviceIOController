@@ -10,14 +10,14 @@
 #ifndef BASE_CLIENT_H
 #define BASE_CLIENT_H
 
-#include "ArduinoJson.h"
-#include "ControllerHandler.h"
-#include "InternalStorage.h"
-#include "JsonSchema.h"
-#include "PortHandler.h"
-#include "TaskHandler.h"
-#include "ControllerTasks.h"
-#include "TaskConstants.h"
+#include <ArduinoJson.h>
+#include "controller/ControllerHandler.h"
+#include "storage/InternalStorage.h"
+#include "constant/JsonSchema.h"
+#include "port/PortHandler.h"
+#include "task/TaskHandler.h"
+#include "task/ControllerTasks.h"
+#include "constant/TaskConstants.h"
 
 /**
  * @class BaseClient

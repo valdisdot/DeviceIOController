@@ -1,4 +1,4 @@
-#include "InternalStorage.h"
+#include "storage/InternalStorage.h"
 
 InternalStorage::InternalStorage(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, const ControllerConstants &constants)
     : dataExchangeJson(dataExchangeJson), jsonSchema(jsonSchema), constants(constants) {}

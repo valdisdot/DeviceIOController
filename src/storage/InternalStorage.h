@@ -10,10 +10,10 @@
 #ifndef INTERNAL_STORAGE_H
 #define INTERNAL_STORAGE_H
 
-#include "ArduinoJson.h"
-#include "ControllerConstants.h"
-#include "JsonSchema.h"
-#include "Preferences.h"
+#include <ArduinoJson.h>
+#include <Preferences.h>
+#include "constant/ControllerConstants.h"
+#include "constant/JsonSchema.h"
 
 /**
  * @class InternalStorage

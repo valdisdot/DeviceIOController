@@ -10,10 +10,10 @@
 #define TASK_HANDLER_H
 
 #include <atomic>
-#include "Task.h"
-#include "TaskConstants.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "task/Task.h"
+#include "constant/TaskConstants.h"
 
 /**
  * @class TaskHandler

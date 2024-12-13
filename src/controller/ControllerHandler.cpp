@@ -1,4 +1,4 @@
-#include "ControllerHandler.h"
+#include "controller/ControllerHandler.h"
 
 ControllerHandler::ControllerHandler(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema) : dataExchangeJson(dataExchangeJson), jsonSchema(jsonSchema) {}
 
