@@ -54,7 +54,7 @@ void TaskHandler::clean(const int& onIndex) {
     lock = false;
 }
 
-TaskHandler::TaskHandler(const TaskConstants& constants) : constants(constants) {
+TaskHandler::TaskHandler(const TaskConstants& constants, int activeCore) : constants(constants), activeCore(activeCore) {
     taskIdHolder = new int[constants.HANDLER_HOLDER_SIZE];
     taskHandleHolder = new TaskHandle_t*[constants.HANDLER_HOLDER_SIZE];
     taskHolder = new Task*[constants.HANDLER_HOLDER_SIZE];
@@ -70,7 +70,7 @@ TaskHandler::TaskHandler(const TaskConstants& constants) : constants(constants) 
         this,
         constants.PRIOTITY_LOW | portPRIVILEGE_BIT,
         &gcTaskHandle,
-        constants.HANDLER_ACTIVE_CORE);
+        activeCore);
 }
 
 int TaskHandler::create(Task* task) {
@@ -92,7 +92,7 @@ int TaskHandler::create(Task* task) {
                     task,
                     task->getPriority() | portPRIVILEGE_BIT,
                     handle,
-                    constants.HANDLER_ACTIVE_CORE);
+                    activeCore);
                 break;
             }
         }

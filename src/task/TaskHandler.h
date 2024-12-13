@@ -26,6 +26,7 @@
 class TaskHandler {
    private:
     const TaskConstants& constants; /**< Reference to task-related constants. */
+    int activeCore;
     TaskHandle_t gcTaskHandle; /**< Handle for the garbage collection task. */
     int* taskIdHolder; /**< Array to store task IDs. */
     TaskHandle_t** taskHandleHolder; /**< Array to store task handles. */
@@ -56,7 +57,7 @@ class TaskHandler {
      * @brief Constructs a `TaskHandler` object.
      * @param constants Reference to the `TaskConstants` for configuration.
      */
-    TaskHandler(const TaskConstants& constants);
+    TaskHandler(const TaskConstants& constants, int activeCore);
 
     /**
      * @brief Creates a new task and adds it to the handler.
