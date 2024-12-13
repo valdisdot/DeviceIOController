@@ -31,11 +31,13 @@ void TaskHandler::gc(void* taskHandler) {
         for (int i = 0; i < handler->constants.HANDLER_HOLDER_SIZE; ++i) {
             if (handler->taskHandleHolder[i]) {
                 if (eTaskGetState(handler->taskHandleHolder[i]) == eDeleted) {
+                    while (handler->lock.exchange(true)) taskYIELD();
                     delete handler->taskHandleHolder[i];
                     handler->taskHandleHolder[i] = nullptr;
                     delete handler->taskHolder[i];
                     handler->taskHolder[i] = nullptr;
                     handler->taskIdHolder[i] = 0;
+                    handler->lock = false;
                 }
             }
         }
@@ -43,13 +45,10 @@ void TaskHandler::gc(void* taskHandler) {
 }
 
 void TaskHandler::clean(const int& onIndex) {
-    while (lock) {
-    }
-    lock = true;
+    while (lock.exchange(true)) taskYIELD();
     delete taskHolder[onIndex];
     taskHolder[onIndex] = nullptr;
     delete taskHandleHolder[onIndex];
-    ;
     taskHandleHolder[onIndex] = nullptr;
     taskIdHolder[onIndex] = 0;
     lock = false;
@@ -76,9 +75,8 @@ TaskHandler::TaskHandler(const TaskConstants& constants) : constants(constants) 
 
 int TaskHandler::create(Task* task) {
     if (task) {
-        while (lock) {
-        }
-        lock = true;
+        while (lock.exchange(true)) taskYIELD();
+
         int taskId = nextTaskId++;
         TaskHandle_t* handle = new TaskHandle_t();
         for (int i = 0; i < constants.HANDLER_HOLDER_SIZE; ++i) {
@@ -95,12 +93,13 @@ int TaskHandler::create(Task* task) {
                     task->getPriority() | portPRIVILEGE_BIT,
                     handle,
                     constants.HANDLER_ACTIVE_CORE);
-                return taskId;
+                break;
             }
         }
         lock = false;
-    }
-    return 0;
+        return taskId;
+    } else
+        return 0;
 }
 
 bool TaskHandler::suspend(const int& taskId) {

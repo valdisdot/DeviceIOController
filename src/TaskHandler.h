@@ -9,6 +9,7 @@
 #ifndef TASK_HANDLER_H
 #define TASK_HANDLER_H
 
+#include <atomic>
 #include "Task.h"
 #include "TaskConstants.h"
 #include "freertos/FreeRTOS.h"
@@ -30,7 +31,7 @@ class TaskHandler {
     TaskHandle_t** taskHandleHolder; /**< Array to store task handles. */
     Task** taskHolder; /**< Array to store pointers to task objects. */
     int nextTaskId = 100; /**< ID counter for generating unique task IDs. */
-    bool lock; /**< Lock to ensure thread-safe operations. */
+    std::atomic<bool> lock{false}; /**< Lock to ensure thread-safe operations. */
 
     /**
      * @brief Task entry point for initializing tasks.
