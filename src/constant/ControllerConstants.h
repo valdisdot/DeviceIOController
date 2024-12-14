@@ -25,6 +25,10 @@ struct ControllerConstants {
     const int MODE_VALUE_OUTPUT = 4;                    /**< Represents a value output mode. */
     const int MODE_INVERSED_LOGICAL_INPUT = 5;          /**< Represents an inversed logical input mode. */
     const int MODE_STATEFUL_LOGICAL_INPUT = 6;          /**< Represents a stateful logical input mode. */
+
+    const int CLIENT_SERIAL = 0;
+    const int CLIENT_MQTT = 1;
+    const int CLIENT_HTTP = 2;
 };
 
 #endif

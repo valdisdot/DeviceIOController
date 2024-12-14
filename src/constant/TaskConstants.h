@@ -56,6 +56,11 @@ struct TaskConstants {
     const int INTERNAL_STORAGE_TASK_STACK_SIZE = 2048; /**< Stack size for internal storage task. */
     const int INTERNAL_STORAGE_TASK_DELAY = 60000; /**< Delay for internal storage task, in milliseconds. */
     const int INTERNAL_STORAGE_TASK_PRIORITY = PRIOTITY_MIDDLE; /**< Priority for internal storage task. */
+
+        // Port handler stateful collector task configurations
+    const int CLIENT_RUNNER_TASK_STACK_SIZE = 8192; /**< Stack size for stateful collector task. */
+    const int CLIENT_RUNNER_TASK_DELAY = 100; /**< Delay for stateful collector task, in milliseconds. */
+    const int CLIENT_RUNNER_TASK_PRIORITY = PRIOTITY_NOW; /**< Priority for stateful collector task. */
 };
 
 #endif
