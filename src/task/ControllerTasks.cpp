@@ -15,7 +15,7 @@ void PortHandlerStatefulCollectorTask::execute() {
     portHandler.collectStatefulData();
 }
 
-DataExchangerSaverTask::DataExchangerSaverTask(const InternalStorage& storage, const TaskConstants& constants) 
+DataExchangerSaverTask::DataExchangerSaverTask(const InternalStorage& storage, const TaskConstants& constants)
     : Task(
           "data_exchanger_saver_task",
           0,
@@ -29,4 +29,19 @@ DataExchangerSaverTask::DataExchangerSaverTask(const InternalStorage& storage, c
 void DataExchangerSaverTask::execute() {
     storage.saveModes();
     storage.saveState();
+}
+
+ClientRunnerTask::ClientRunnerTask(BaseClient& client, const TaskConstants& constants)
+    : Task(
+          "client_runner_task",
+          0,
+          constants.CLIENT_RUNNER_TASK_DELAY,
+          constants.TASK_TYPE_CYCLIC,
+          constants.CLIENT_RUNNER_TASK_STACK_SIZE,
+          constants.CLIENT_RUNNER_TASK_PRIORITY,
+          constants),
+      client(client) {}
+
+void ClientRunnerTask::execute() {
+    client.run();
 }

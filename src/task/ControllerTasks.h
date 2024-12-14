@@ -65,4 +65,14 @@ class DataExchangerSaverTask : public Task {
     void execute() override;
 };
 
+class ClientRunnerTask : public Task {
+   private:
+    BaseClient& client;
+
+   public:
+    ClientRunnerTask(BaseClient& client, const TaskConstants& constants);
+
+    void execute() override;
+};
+
 #endif
