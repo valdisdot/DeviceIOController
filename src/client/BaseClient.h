@@ -13,12 +13,9 @@
 #include <ArduinoJson.h>
 
 #include "constant/JsonSchema.h"
-#include "constant/TaskConstants.h"
 #include "controller/ControllerHandler.h"
 #include "port/PortHandler.h"
 #include "storage/InternalStorage.h"
-#include "task/ControllerTasks.h"
-#include "task/TaskHandler.h"
 
 /**
  * @class BaseClient
@@ -35,8 +32,6 @@ class BaseClient {
     InternalStorage &storage;             /**< Instance of InternalStorage for ROM memory interaction. */
     ControllerHandler &controllerHandler; /**< Instance of ControllerHandler for controller operations. */
     PortHandler &portHandler;             /**< Instance of PortHandler for managing port states and modes. */
-    const TaskConstants &taskConstants;
-    TaskHandler &taskHandler;
 
     /**
      * @brief Processes an incoming message from a JSON string.
@@ -74,7 +69,7 @@ class BaseClient {
      * @param controllerHandler Reference to a ControllerHandler object for controller operations.
      * @param portHandler Reference to a PortHandler object for managing port states and modes.
      */
-    BaseClient(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, const TaskConstants &taskConstants, TaskHandler &taskHandler);
+    BaseClient(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler);
 
     /**
      * @brief Abstract method to send data to the outside world.
