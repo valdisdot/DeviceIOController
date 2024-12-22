@@ -43,5 +43,5 @@ ClientRunnerTask::ClientRunnerTask(BaseClient& client, const TaskConstants& cons
       client(client) {}
 
 void ClientRunnerTask::execute() {
-    client.run();
+    client.step();
 }
