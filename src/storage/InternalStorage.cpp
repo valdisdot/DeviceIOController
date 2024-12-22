@@ -13,7 +13,6 @@ void InternalStorage::readConfiguration() {
     preferences.begin(jsonSchema.CONFIG_WORD);
     JsonObject config = (*dataExchangeJson)[jsonSchema.CONFIG_WORD].to<JsonObject>();
     if (preferences.isKey(jsonSchema.MODE_WORD)) config[jsonSchema.MODE_WORD] = preferences.getInt(jsonSchema.MODE_WORD, 0);
-    if (preferences.isKey(jsonSchema.BAUD_RATE_WORD)) config[jsonSchema.BAUD_RATE_WORD] = preferences.getInt(jsonSchema.BAUD_RATE_WORD, 115200);
     char buffer[64];
     if (preferences.isKey(jsonSchema.SSID_WORD)) {
         preferences.getString(jsonSchema.SSID_WORD, buffer, 64);
@@ -63,8 +62,6 @@ void InternalStorage::saveConfiguration() {
         preferences.begin(jsonSchema.CONFIG_WORD);
         if (config[jsonSchema.MODE_WORD].is<signed int>())
             preferences.putInt(jsonSchema.MODE_WORD, config[jsonSchema.MODE_WORD].as<signed int>());
-        if (config[jsonSchema.BAUD_RATE_WORD].is<signed int>())
-            preferences.putInt(jsonSchema.BAUD_RATE_WORD, config[jsonSchema.BAUD_RATE_WORD].as<signed int>());
         if (config[jsonSchema.SSID_WORD].is<const char *>())
             preferences.putString(jsonSchema.SSID_WORD, config[jsonSchema.SSID_WORD].as<const char *>());
         if (config[jsonSchema.PASSWORD_WORD].is<const char *>())
