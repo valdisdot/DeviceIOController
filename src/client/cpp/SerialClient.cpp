@@ -19,18 +19,20 @@ void SerialClient::sendResponse(const char *response) {
     send(response);
 }
 
-SerialClient::SerialClient(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, HardwareSerial &serial)
-    : BaseClient(dataExchangeJson, jsonSchema, storage, controllerHandler, portHandler), serial(serial) {}
+SerialClient::SerialClient(InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, HardwareSerial &serial)
+    : BaseClient(storage, controllerHandler, portHandler), serial(serial) {}
 
 bool SerialClient::initialize() {
-    storage.readConfiguration();
-    serial.begin(38400);
+    storage.restoreConfiguration();
     unsigned long start = millis();
     while (!serial && millis() - start < 1000) { /*wait untill ready plus 2 seconds*/
     }
     while (serial.available() > 0) {
         serial.read();  //clear any garbage data
     }
+    controllerHandler.getControllerState().setSerialState(true);
+    controllerHandler.getControllerState().setWiFiState(false);
+    controllerHandler.getControllerState().setCellularState(false);
     return true;
 }
 

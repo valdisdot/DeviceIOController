@@ -60,7 +60,7 @@ class SerialClient : public BaseClient {
      * @param portHandler Reference to the `PortHandler` object.
      * @param serial Reference to the hardware serial interface.
      */
-    SerialClient(JsonDocument *dataExchangeJson, const JsonSchema &jsonSchema, InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, HardwareSerial &serial);
+    SerialClient(InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, HardwareSerial &serial);
 
     /**
      * @brief Initializes the serial client.
