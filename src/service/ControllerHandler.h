@@ -7,7 +7,7 @@
 class ControllerHandler {
    private:
     ControllerState& state;
-    char id[32];
+    char id[CONSTANT.SIZE_16];
 
    public:
     ControllerHandler(ControllerState& state);
