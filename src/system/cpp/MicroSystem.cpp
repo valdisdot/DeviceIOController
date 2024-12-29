@@ -14,6 +14,26 @@ void copyString(char* destination, const char* source, int limit) {
     }
 }
 
+void concatenateString(char* destination, const char* source, int limit) {
+    int destLen = 0;
+    while (destLen < limit && destination[destLen] != '\0') destLen++;
+    int i = 0;
+    while (destLen + i < limit - 1 && source[i] != '\0') {
+        destination[destLen + i] = source[i];
+        i++;
+    }
+    if (destLen < limit) destination[destLen + i] = '\0';
+}
+
+void convertToASCIIString(char* destination, const byte* byteSource, int limit) {
+    int i = 0;
+    while (i < limit - 1 && byteSource[i] != '\0') {
+        destination[i] = (char)byteSource[i];
+        i++;
+    }
+    if (limit > 0) destination[i] = '\0';
+}
+
 int hashCode(const char* string) {
     int hashCode = 0;
     while (*string) {

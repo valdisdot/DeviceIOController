@@ -19,6 +19,8 @@ const static RequestType REQUEST_TYPE;
 const static MessageSchema SCHEMA_MESSAGE;
 
 void copyString(char *destination, const char *source, int limit);
+void concatenateString(char* destination, const char* source, int limit);
+void convertToANSIIString(char* destination, const byte* byteSource, int limit);
 int hashCode(const char *string);
 bool equal(const char *s1, const char *s2);
 
