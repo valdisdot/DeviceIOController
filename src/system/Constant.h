@@ -2,14 +2,15 @@
 #define SYSTEM_CONSTANT_H
 
 struct SystemConstant {
-    const int SIZE_32 = 32;
-    const int SIZE_64 = 64;
-    const int SIZE_128 = 128;
-    const int SIZE_512 = 512;
-    const int SIZE_1K = 1024;
-    const int SIZE_2K = 2048;
-    const int SIZE_4K = 4096;
-    const int SIZE_8K = 8192;
+    const static int SIZE_16 = 16;
+    const static int SIZE_32 = 32;
+    const static int SIZE_64 = 64;
+    const static int SIZE_128 = 128;
+    const static int SIZE_512 = 512;
+    const static int SIZE_1K = 1024;
+    const static int SIZE_2K = 2048;
+    const static int SIZE_4K = 4096;
+    const static int SIZE_8K = 8192;
 
     const int CONNECTION_MODE_SERIAL = 1;
     const int CONNECTION_MODE_WIFI = 2;
