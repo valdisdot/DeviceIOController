@@ -1,52 +1,49 @@
-#include "Arduino.h"
-#include "ArduinoJson.h"
+#include "system/MicroSystem.h"
 #include "client/BaseClient.h"
 #include "client/SerialClient.h"
-#include "constant/ControllerConstants.h"
-#include "constant/JsonSchema.h"
-#include "constant/TaskConstants.h"
-#include "controller/ControllerHandler.h"
-#include "port/PortHandler.h"
-#include "storage/InternalStorage.h"
+#include "service/ControllerHandler.h"
+#include "service/PortHandler.h"
+#include "service/InternalStorage.h"
 #include "task/ControllerTasks.h"
 #include "task/TaskHandler.h"
 
-JsonDocument *doc = new JsonDocument();
-JsonSchema jsonSchema;
-ControllerConstants constants;
-InternalStorage storage(doc, jsonSchema, constants);
-PortHandler portHandler(doc, jsonSchema, constants);
-ControllerHandler controllerHandler(doc, jsonSchema);
-TaskConstants taskConstants;
-TaskHandler mainTaskHandler(taskConstants, taskConstants.MAIN_CORE);
-TaskHandler backgroundTaskHandler(taskConstants, taskConstants.BACKGROUND_CORE);
+PortState portState;
+ControllerState controllerState;
+ConnectionConfiguration connectionConfiguration;
+ServerConfiguration serverConfiguration;
+
+InternalStorage storage(portState, connectionConfiguration, serverConfiguration);
+PortHandler portHandler(portState);
+ControllerHandler controllerHandler(controllerState);
+TaskHandler mainTaskHandler(TASK_CONSTANT.MAIN_CORE);
+TaskHandler backgroundTaskHandler(TASK_CONSTANT.BACKGROUND_CORE);
 BaseClient *client = nullptr;
 
 void setup() {
-    storage.readAll();
-    portHandler.pullModes();
+    storage.restoreConfiguration();
+    storage.restoreState();
     portHandler.pullState();
-    portHandler.collectData();
-    controllerHandler.insertId();
-    int mode = (*doc)[jsonSchema.CONFIG_WORD][jsonSchema.MODE_WORD].as<int>();
+    portHandler.pushState();
+    int mode = connectionConfiguration.getMode();
 
-    if (mode == constants.CLIENT_SERIAL) {
-        client = new SerialClient(doc, jsonSchema, storage, controllerHandler, portHandler, Serial);
+    if (mode == CONSTANT.CONNECTION_MODE_SERIAL) {
+        Serial.begin(38400);
+        client = new SerialClient(storage, controllerHandler, portHandler, Serial);
     } else {
-        int transmissionInterval = (*doc)[jsonSchema.CONFIG_WORD][jsonSchema.TRANSMISSION_INTERVAL_WORD].as<int>();
+        int transmissionInterval = connectionConfiguration.getTransmissionInterval();
         // make a task to pushMessages if mode is not serial (not one-chanel client's)
         // here!
-        if (mode == constants.CLIENT_MQTT) {
-            // init mqtt-client
-        } else if (mode == constants.CLIENT_HTTP) {
-            // init http-client
+        if (mode == CONSTANT.CONNECTION_MODE_WIFI) {
+            // init mqtt-client with wifi
+        } else if (mode == CONSTANT.CONNECTION_MODE_CELLULAR) {
+            // init mqtt-client with cellurar
         }  // other clients
     }
     if (client) {
         while (!client->initialize()) {}
-        backgroundTaskHandler.create(new PortHandlerStatefulCollectorTask(portHandler, taskConstants));
-        backgroundTaskHandler.create(new DataExchangerSaverTask(storage, taskConstants));
-        mainTaskHandler.create(new ClientRunnerTask(*client, taskConstants));
+        backgroundTaskHandler.create(new PortHandlerStatefulCollectorTask(portHandler));
+        backgroundTaskHandler.create(new BackupTask(storage));
+        mainTaskHandler.create(new ClientRunnerTask(*client));
     } else {
         ESP_LOGE("Initialization error", "Client is not initialized, no instanse was found for mode: %d", mode);
         abort();
