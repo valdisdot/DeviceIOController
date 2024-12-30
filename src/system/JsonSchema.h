@@ -34,7 +34,6 @@ struct ServerConfigurationSchema {
     const char* PORT = "port";
     const char* USER = "user";
     const char* PASSWORD = "password";
-    const char* SECURE = "secure";
     const char* CERTIFICATE = "certificate";
 
     ServerConfigurationSchema() = default;

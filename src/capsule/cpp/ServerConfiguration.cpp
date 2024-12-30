@@ -17,7 +17,7 @@ const char* ServerConfiguration::getPassword() {
 }
 
 bool ServerConfiguration::isSecure() {
-    return holder[SCHEMA_SERVER_CONFIGURATION.SECURE].is<bool>() ? holder[SCHEMA_SERVER_CONFIGURATION.SECURE].as<bool>() : false;
+    return holder[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE].is<const char*>() && !isBlank(holder[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE].as<const char*>());
 }
 
 const char* ServerConfiguration::getCertificate() {
@@ -34,7 +34,6 @@ void ServerConfiguration::updateFromJson(JsonObjectConst configuration) {
         if (configuration[SCHEMA_SERVER_CONFIGURATION.PORT].is<int>()) holder[SCHEMA_SERVER_CONFIGURATION.PORT] = configuration[SCHEMA_SERVER_CONFIGURATION.PORT];
         if (configuration[SCHEMA_SERVER_CONFIGURATION.USER].is<const char*>()) holder[SCHEMA_SERVER_CONFIGURATION.USER] = configuration[SCHEMA_SERVER_CONFIGURATION.USER];
         if (configuration[SCHEMA_SERVER_CONFIGURATION.PASSWORD].is<const char*>()) holder[SCHEMA_SERVER_CONFIGURATION.PASSWORD] = configuration[SCHEMA_SERVER_CONFIGURATION.PASSWORD];
-        if (configuration[SCHEMA_SERVER_CONFIGURATION.SECURE].is<bool>()) holder[SCHEMA_SERVER_CONFIGURATION.SECURE] = configuration[SCHEMA_SERVER_CONFIGURATION.SECURE];
         if (configuration[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE].is<const char*>()) holder[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE] = configuration[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE];
     }
 }
