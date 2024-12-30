@@ -33,6 +33,7 @@ struct SystemConstant {
     const char* NO_VALUE_STR = "";
 
     const int PORT_COUNT = 40;
+    const int SERIAL_BAUD_RATE = 38400;
 
     SystemConstant() = default;
 };
@@ -86,6 +87,15 @@ struct TaskConstant {
     const int CLIENT_RUNNER_TASK_STACK_SIZE = 8192; 
     const int CLIENT_RUNNER_TASK_DELAY = 100; 
     const int CLIENT_RUNNER_TASK_PRIORITY = PRIOTITY_NOW; 
+};
+
+struct MqttConstant {
+    const char* IN = "in";
+    const char* OUT = "out";
+    const char* STATE = "state";
+    const char* CONTROLLER_STATE = "controllerState";
+    const char* REQUEST = "request";
+    const char* RESPONSE = "response";
 };
 
 #endif
