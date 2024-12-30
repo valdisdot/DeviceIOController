@@ -34,6 +34,19 @@ void convertToASCIIString(char* destination, const byte* byteSource, int limit) 
     if (limit > 0) destination[i] = '\0';
 }
 
+bool isEmpty(const char* s) {
+    return s == nullptr || sizeof(s) == 0 || s[0] == '\0';
+}
+
+bool isBlank(const char* s) {
+    if(!isEmpty(s)) {
+        for(int i = 0; i < sizeof(s); ++i) {
+            if(s[i] > 32 && s[i] != 127) return false;
+        }
+    }
+    return true;
+}
+
 int hashCode(const char* string) {
     int hashCode = 0;
     while (*string) {

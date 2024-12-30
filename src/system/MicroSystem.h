@@ -10,6 +10,7 @@ const static bool DEBUG_MODE = true;
 
 const static SystemConstant CONSTANT;
 const static TaskConstant TASK_CONSTANT;
+const static MqttConstant MQTT_CONSTANT;
 const static BaseSchema SCHEMA_BASE;
 const static StateSchema SCHEMA_STATE;
 const static ConnectionConfigurationSchema SCHEMA_CONNECTION_CONFIGURATION;
@@ -20,7 +21,9 @@ const static MessageSchema SCHEMA_MESSAGE;
 
 void copyString(char *destination, const char *source, int limit);
 void concatenateString(char* destination, const char* source, int limit);
-void convertToANSIIString(char* destination, const byte* byteSource, int limit);
+void convertToASCIIString(char* destination, const byte* byteSource, int limit);
+bool isEmpty(const char* s);
+bool isBlank(const char* s);
 int hashCode(const char *string);
 bool equal(const char *s1, const char *s2);
 
