@@ -31,9 +31,12 @@ struct SystemConstant {
 
     const int NO_VALUE_INT = -1;
     const char* NO_VALUE_STR = "";
+    const char* NULL_STR = "null";
 
     const int PORT_COUNT = 40;
     const int SERIAL_BAUD_RATE = 38400;
+
+    const int CONNECTION_ATTEMPTS = 5;
 
     SystemConstant() = default;
 };
@@ -90,12 +93,21 @@ struct TaskConstant {
 };
 
 struct MqttConstant {
+    const int KEEP_ALIVE_SECONDS = 90;
     const char* IN = "in";
     const char* OUT = "out";
     const char* STATE = "state";
     const char* CONTROLLER_STATE = "controllerState";
     const char* REQUEST = "request";
     const char* RESPONSE = "response";
+    const char* LOG = "log";
+};
+
+struct LogConstant {
+    const char* LEVEL_DEBUG = "DEBUG";
+    const char* LEVEL_INFO = "INFO";
+    const char* LEVEL_WARNING = "WARNING";
+    const char* LEVEL_ERROR = "ERROR";
 };
 
 #endif
