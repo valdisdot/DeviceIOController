@@ -66,4 +66,13 @@ struct MessageSchema {
     MessageSchema() = default;
 };
 
+struct LogSchema {
+    const char * TIMESTAMP = "timestamp";
+    const char * THEME = "theme";
+    const char* INTEGER = "integer";
+    const char* TEXT = "text";
+    const char* OBJECT = "object";
+    const char* LEVEL = "level";
+};
+
 #endif
