@@ -5,7 +5,7 @@ int ConnectionConfiguration::getMode() {
 }
 
 const char* ConnectionConfiguration::getSSID() {
-    return holder[SCHEMA_CONNECTION_CONFIGURATION.SSID].is<const char*>() ? holder[SCHEMA_CONNECTION_CONFIGURATION.MODE].as<const char*>() : CONSTANT.NO_VALUE_STR;
+    return holder[SCHEMA_CONNECTION_CONFIGURATION.SSID].is<const char*>() ? holder[SCHEMA_CONNECTION_CONFIGURATION.SSID].as<const char*>() : CONSTANT.NO_VALUE_STR;
 }
 
 const char* ConnectionConfiguration::getPassword() {
@@ -36,7 +36,7 @@ void ConnectionConfiguration::updateFromJson(JsonObjectConst configuration) {
     if (configuration) {
         if (configuration[SCHEMA_CONNECTION_CONFIGURATION.MODE].is<int>()) {
             int mode = configuration[SCHEMA_CONNECTION_CONFIGURATION.MODE];
-            if(mode < CONSTANT.CONNECTION_MODE_SERIAL || mode > CONSTANT.CONNECTION_MODE_SERIAL) mode = CONSTANT.CONNECTION_MODE_SERIAL;
+            if(mode < CONSTANT.CONNECTION_MODE_SERIAL || mode > CONSTANT.CONNECTION_MODE_CELLULAR) mode = CONSTANT.CONNECTION_MODE_SERIAL;
             holder[SCHEMA_CONNECTION_CONFIGURATION.MODE] = mode;
         } else holder[SCHEMA_CONNECTION_CONFIGURATION.MODE] = CONSTANT.CONNECTION_MODE_SERIAL;
         if (configuration[SCHEMA_CONNECTION_CONFIGURATION.SSID].is<const char*>()) holder[SCHEMA_CONNECTION_CONFIGURATION.SSID] = configuration[SCHEMA_CONNECTION_CONFIGURATION.SSID];
