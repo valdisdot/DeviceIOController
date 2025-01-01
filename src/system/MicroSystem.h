@@ -16,8 +16,10 @@ const static StateSchema SCHEMA_STATE;
 const static ConnectionConfigurationSchema SCHEMA_CONNECTION_CONFIGURATION;
 const static ServerConfigurationSchema SCHEMA_SERVER_CONFIGURATION;
 const static ControllerStateSchema SCHEMA_CONTROLLER_STATE;
+const static LogSchema LOG_SCHEMA;
 const static RequestType REQUEST_TYPE;
 const static MessageSchema SCHEMA_MESSAGE;
+const static LogConstant LOG_CONSTANT;
 
 void copyString(char *destination, const char *source, int limit);
 void concatenateString(char* destination, const char* source, int limit);
