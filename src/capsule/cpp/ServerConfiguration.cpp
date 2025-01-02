@@ -1,27 +1,27 @@
 #include "capsule/ServerConfiguration.h"
 
 const char* ServerConfiguration::getURL() {
-    return holder[SCHEMA_SERVER_CONFIGURATION.ADDRESS].is<const char*>() ? holder[SCHEMA_SERVER_CONFIGURATION.ADDRESS].as<const char*>() : CONSTANT.NO_VALUE_STR;
+    return holder[JSON$SERVER_CONFIGURATION.ADDRESS].is<const char*>() ? holder[JSON$SERVER_CONFIGURATION.ADDRESS].as<const char*>() : $SYSTEM.NO_VALUE$STR;
 }
 
 int ServerConfiguration::getPort() {
-    return holder[SCHEMA_SERVER_CONFIGURATION.PORT].is<int>() ? holder[SCHEMA_SERVER_CONFIGURATION.PORT].as<int>() : 0;
+    return holder[JSON$SERVER_CONFIGURATION.PORT].is<int>() ? holder[JSON$SERVER_CONFIGURATION.PORT].as<int>() : 0;
 }
 
 const char* ServerConfiguration::getUser() {
-    return holder[SCHEMA_SERVER_CONFIGURATION.USER].is<const char*>() ? holder[SCHEMA_SERVER_CONFIGURATION.USER].as<const char*>() : CONSTANT.NO_VALUE_STR;
+    return holder[JSON$SERVER_CONFIGURATION.USER].is<const char*>() ? holder[JSON$SERVER_CONFIGURATION.USER].as<const char*>() : $SYSTEM.NO_VALUE$STR;
 }
 
 const char* ServerConfiguration::getPassword() {
-    return holder[SCHEMA_SERVER_CONFIGURATION.PASSWORD].is<const char*>() ? holder[SCHEMA_SERVER_CONFIGURATION.PASSWORD].as<const char*>() : CONSTANT.NO_VALUE_STR;
+    return holder[JSON$SERVER_CONFIGURATION.PASSWORD].is<const char*>() ? holder[JSON$SERVER_CONFIGURATION.PASSWORD].as<const char*>() : $SYSTEM.NO_VALUE$STR;
 }
 
 bool ServerConfiguration::isSecure() {
-    return holder[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE].is<const char*>() && !isBlank(holder[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE].as<const char*>());
+    return holder[JSON$SERVER_CONFIGURATION.CERTIFICATE].is<const char*>() && !isBlank(holder[JSON$SERVER_CONFIGURATION.CERTIFICATE].as<const char*>());
 }
 
 const char* ServerConfiguration::getCertificate() {
-    return holder[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE].is<const char*>() ? holder[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE].as<const char*>() : CONSTANT.NO_VALUE_STR;
+    return holder[JSON$SERVER_CONFIGURATION.CERTIFICATE].is<const char*>() ? holder[JSON$SERVER_CONFIGURATION.CERTIFICATE].as<const char*>() : $SYSTEM.NO_VALUE$STR;
 }
 
 JsonObjectConst ServerConfiguration::getAsJson() {
@@ -30,10 +30,10 @@ JsonObjectConst ServerConfiguration::getAsJson() {
 
 void ServerConfiguration::updateFromJson(JsonObjectConst configuration) {
     if (configuration) {
-        if (configuration[SCHEMA_SERVER_CONFIGURATION.ADDRESS].is<const char*>()) holder[SCHEMA_SERVER_CONFIGURATION.ADDRESS] = configuration[SCHEMA_SERVER_CONFIGURATION.ADDRESS];
-        if (configuration[SCHEMA_SERVER_CONFIGURATION.PORT].is<int>()) holder[SCHEMA_SERVER_CONFIGURATION.PORT] = configuration[SCHEMA_SERVER_CONFIGURATION.PORT];
-        if (configuration[SCHEMA_SERVER_CONFIGURATION.USER].is<const char*>()) holder[SCHEMA_SERVER_CONFIGURATION.USER] = configuration[SCHEMA_SERVER_CONFIGURATION.USER];
-        if (configuration[SCHEMA_SERVER_CONFIGURATION.PASSWORD].is<const char*>()) holder[SCHEMA_SERVER_CONFIGURATION.PASSWORD] = configuration[SCHEMA_SERVER_CONFIGURATION.PASSWORD];
-        if (configuration[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE].is<const char*>()) holder[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE] = configuration[SCHEMA_SERVER_CONFIGURATION.CERTIFICATE];
+        if (configuration[JSON$SERVER_CONFIGURATION.ADDRESS].is<const char*>()) holder[JSON$SERVER_CONFIGURATION.ADDRESS] = configuration[JSON$SERVER_CONFIGURATION.ADDRESS];
+        if (configuration[JSON$SERVER_CONFIGURATION.PORT].is<int>()) holder[JSON$SERVER_CONFIGURATION.PORT] = configuration[JSON$SERVER_CONFIGURATION.PORT];
+        if (configuration[JSON$SERVER_CONFIGURATION.USER].is<const char*>()) holder[JSON$SERVER_CONFIGURATION.USER] = configuration[JSON$SERVER_CONFIGURATION.USER];
+        if (configuration[JSON$SERVER_CONFIGURATION.PASSWORD].is<const char*>()) holder[JSON$SERVER_CONFIGURATION.PASSWORD] = configuration[JSON$SERVER_CONFIGURATION.PASSWORD];
+        if (configuration[JSON$SERVER_CONFIGURATION.CERTIFICATE].is<const char*>()) holder[JSON$SERVER_CONFIGURATION.CERTIFICATE] = configuration[JSON$SERVER_CONFIGURATION.CERTIFICATE];
     }
 }
