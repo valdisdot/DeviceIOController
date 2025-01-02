@@ -3,7 +3,7 @@
 
 #include "system/MicroSystem.h"
 
-class ConnectionConfiguration {
+class NetworkConfiguration {
    private:
     JsonDocument holder;
 
@@ -14,7 +14,6 @@ class ConnectionConfiguration {
     const char* getAPNName();
     const char* getAPNUser();
     const char* getAPNPassword();
-    int getTransmissionInterval();
     JsonObjectConst getAsJson();
     void updateFromJson(JsonObjectConst configuration);
 };
