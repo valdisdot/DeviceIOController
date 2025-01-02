@@ -16,15 +16,15 @@ const int& Task::getLoopDelay() {
 }
 
 bool Task::isCyclic() {
-    return executionType == TASK_CONSTANT.TASK_TYPE_CYCLIC;
+    return executionType == $TASK.TYPE$CYCLIC;
 }
 
 bool Task::isReactive() {
-    return executionType == TASK_CONSTANT.TASK_TYPE_REACTIVE;
+    return executionType == $TASK.TYPE$REACTIVE;
 }
 
 bool Task::isSingleRun() {
-    return executionType == TASK_CONSTANT.TASK_TYPE_SINGLE_RUN;
+    return executionType == $TASK.TYPE$SINGLE_RUN;
 }
 
 const int& Task::getStackSize() {

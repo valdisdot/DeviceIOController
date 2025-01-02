@@ -27,8 +27,8 @@ void TaskHandler::gc(void* taskHandler) {
     TaskHandler* handler = static_cast<TaskHandler*>(taskHandler);
     unsigned int notification;
     for (;;) {
-        xTaskNotifyWait(0, 0, &notification, TASK_CONSTANT.HANDLER_GC_INTERVAL / portTICK_PERIOD_MS);
-        for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+        xTaskNotifyWait(0, 0, &notification, $TASK.HANDLER$GC_INTERVAL / portTICK_PERIOD_MS);
+        for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
             if (handler->taskHandleHolder[i]) {
                 if (eTaskGetState(handler->taskHandleHolder[i]) == eDeleted) {
                     while (handler->lock.exchange(true)) taskYIELD();
@@ -55,10 +55,10 @@ void TaskHandler::clean(const int& onIndex) {
 }
 
 TaskHandler::TaskHandler(int activeCore) : activeCore(activeCore) {
-    taskIdHolder = new int[TASK_CONSTANT.HANDLER_HOLDER_SIZE];
-    taskHandleHolder = new TaskHandle_t*[TASK_CONSTANT.HANDLER_HOLDER_SIZE];
-    taskHolder = new Task*[TASK_CONSTANT.HANDLER_HOLDER_SIZE];
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    taskIdHolder = new int[$TASK.HANDLER$HOLDER_SIZE];
+    taskHandleHolder = new TaskHandle_t*[$TASK.HANDLER$HOLDER_SIZE];
+    taskHolder = new Task*[$TASK.HANDLER$HOLDER_SIZE];
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         taskIdHolder[i] = 0;
         taskHandleHolder[i] = nullptr;
         taskHolder[i] = nullptr;
@@ -68,7 +68,7 @@ TaskHandler::TaskHandler(int activeCore) : activeCore(activeCore) {
         "gc_task",
         2048,
         this,
-        TASK_CONSTANT.PRIOTITY_LOW | portPRIVILEGE_BIT,
+        $TASK.PRIOTITY$LOW | portPRIVILEGE_BIT,
         &gcTaskHandle,
         activeCore);
 }
@@ -79,7 +79,7 @@ int TaskHandler::create(Task* task) {
 
         int taskId = nextTaskId++;
         TaskHandle_t* handle = new TaskHandle_t();
-        for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+        for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
             if (!taskIdHolder[i]) {
                 taskIdHolder[i] = taskId;
                 taskHandleHolder[i] = handle;
@@ -103,7 +103,7 @@ int TaskHandler::create(Task* task) {
 }
 
 bool TaskHandler::suspend(const int& taskId) {
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         if (taskId == taskIdHolder[i]) {
             if (taskHandleHolder[i]) {
                 int state = eTaskGetState(taskHandleHolder[i]);
@@ -119,7 +119,7 @@ bool TaskHandler::suspend(const int& taskId) {
 }
 
 bool TaskHandler::resume(const int& taskId) {
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         if (taskId == taskIdHolder[i]) {
             if (taskHandleHolder[i]) {
                 int state = eTaskGetState(taskHandleHolder[i]);
@@ -135,7 +135,7 @@ bool TaskHandler::resume(const int& taskId) {
 }
 
 bool TaskHandler::invoke(const int& taskId) {
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         if (taskId == taskIdHolder[i]) {
             if (taskHandleHolder[i]) {
                 int state = eTaskGetState(taskHandleHolder[i]);
@@ -151,7 +151,7 @@ bool TaskHandler::invoke(const int& taskId) {
 }
 
 void TaskHandler::cancel(const int& taskId) {
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         if (taskId == taskIdHolder[i]) {
             if (taskHandleHolder[i]) {
                 if (eTaskGetState(taskHandleHolder[i]) != eDeleted) vTaskDelete(taskHandleHolder[i]);
@@ -163,7 +163,7 @@ void TaskHandler::cancel(const int& taskId) {
 }
 
 int TaskHandler::getAvailableStackSize(const int& taskId) {
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         if (taskId == taskIdHolder[i]) {
             if (taskHandleHolder[i])
                 return eTaskGetState(taskHandleHolder[i]) == eDeleted ? 0 : uxTaskGetStackHighWaterMark(taskHandleHolder[i]);
@@ -176,7 +176,7 @@ int TaskHandler::getAvailableStackSize(const int& taskId) {
 }
 
 void TaskHandler::setPriority(const int& taskId, int priority) {
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         if (taskId == taskIdHolder[i]) {
             if (taskHandleHolder[i]) {
                 if (eTaskGetState(taskHandleHolder[i]) == eDeleted) vTaskPrioritySet(taskHandleHolder[i], priority);
@@ -188,20 +188,20 @@ void TaskHandler::setPriority(const int& taskId, int priority) {
 }
 
 int TaskHandler::getPriority(const int& taskId) {
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         if (taskId == taskIdHolder[i]) {
             if (taskHandleHolder[i])
                 return taskHandleHolder[i] && eTaskGetState(taskHandleHolder[i]) == eDeleted ? 0 : uxTaskPriorityGet(taskHandleHolder[i]);
             else
                 clean(i);
-            return TASK_CONSTANT.PRIOTITY_LOW;
+            return $TASK.PRIOTITY$LOW;
         }
     }
-    return TASK_CONSTANT.PRIOTITY_LOW;
+    return $TASK.PRIOTITY$LOW;
 }
 
 const char* TaskHandler::getName(const int& taskId) {
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         if (taskId == taskIdHolder[i]) {
             if (taskHolder[i])
                 return taskHolder[i]->getName();
@@ -214,29 +214,29 @@ const char* TaskHandler::getName(const int& taskId) {
 }
 
 int TaskHandler::getState(const int& taskId) {
-    for (int i = 0; i < TASK_CONSTANT.HANDLER_HOLDER_SIZE; ++i) {
+    for (int i = 0; i < $TASK.HANDLER$HOLDER_SIZE; ++i) {
         if (taskId == taskIdHolder[i]) {
             if (taskHandleHolder[i]) {
                 switch (eTaskGetState(taskHandleHolder[i])) {
                     case eRunning:
-                        return TASK_CONSTANT.TASK_STATE_RUNNING;
+                        return $TASK.STATE$RUNNING;
                     case eReady:
-                        return TASK_CONSTANT.TASK_STATE_AWAITS_IN_QUEUE;
+                        return $TASK.STATE$AWAITS_IN_QUEUE;
                     case eBlocked:
-                        return TASK_CONSTANT.TASK_STATE_AWAINTS_NOTIFICATION;
+                        return $TASK.STATE$AWAINTS_NOTIFICATION;
                     case eSuspended:
-                        return TASK_CONSTANT.TASK_STATE_SUSPENDED;
+                        return $TASK.STATE$SUSPENDED;
                     case eDeleted:
-                        return TASK_CONSTANT.TASK_STATE_DELETED;
+                        return $TASK.STATE$DELETED;
                     default:
-                        return TASK_CONSTANT.TASK_STATE_UNDEFINED;
+                        return $TASK.STATE$UNDEFINED;
                 }
             } else
                 clean(i);
-            return TASK_CONSTANT.TASK_STATE_UNDEFINED;
+            return $TASK.STATE$UNDEFINED;
         }
     }
-    return TASK_CONSTANT.TASK_STATE_UNDEFINED;
+    return $TASK.STATE$UNDEFINED;
 }
 
 void TaskHandler::gc() {
