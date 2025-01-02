@@ -11,8 +11,7 @@ const char* ControllerHandler::getId() {
 }
 
 void ControllerHandler::pushControllerState() {
-    state.setMinMemoryState(esp_get_minimum_free_heap_size());
-    state.setMaxMemoryState(esp_get_free_heap_size());
+    state.setMemory(esp_get_free_heap_size());
     switch (esp_reset_reason()) {
         case ESP_RST_POWERON:
             state.setLastRebootReason("after power on");

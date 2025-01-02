@@ -7,7 +7,7 @@
 class ControllerHandler {
    private:
     ControllerState& state;
-    char id[CONSTANT.SIZE_32];
+    char id[$SYSTEM.SIZE$32];
 
    public:
     ControllerHandler(ControllerState& state);
