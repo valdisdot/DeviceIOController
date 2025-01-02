@@ -12,14 +12,12 @@ class ControllerState {
     void setWiFiState(bool state);
     void setCellularState(bool state);
     void setSerialState(bool state);
-    void setMaxMemoryState(int state);
-    void setMinMemoryState(int state);
+    void setMemory(int state);
     void setLastRebootReason(const char *reason);
     bool getWiFiState();
     bool getCellularState();
     bool getSerialState();
-    int getMaxMemoryState();
-    int getMinMemoryState();
+    int getMemory();
     const char* getLastRebootReason();
     JsonObjectConst getAsJson();
 };
