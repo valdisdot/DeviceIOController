@@ -4,26 +4,32 @@
 #include <Preferences.h>
 #include "system/MicroSystem.h"
 #include "capsule/PortState.h"
-#include "capsule/ConnectionConfiguration.h"
+#include "capsule/NetworkConfiguration.h"
 #include "capsule/ServerConfiguration.h"
+#include "capsule/ControllerConfiguration.h"
 
 class InternalStorage {
    private:
     Preferences preferences;  
     PortState& state;
-    ConnectionConfiguration& connectionConfiguration;
+    NetworkConfiguration& connectionConfiguration;
     ServerConfiguration& serverConfiguration;
+    ControllerConfiguration& controllerConfiguration;
+
+    JsonDocument doc;
+    char buffer[$SYSTEM.SIZE$2K];
 
    public:
-    InternalStorage(PortState& state, ConnectionConfiguration& connectionConfiguration, ServerConfiguration& serverConfiguration);
+    InternalStorage(PortState& state, NetworkConfiguration& connectionConfiguration, ServerConfiguration& serverConfiguration, ControllerConfiguration& controllerConfiguration);
     void restoreConfiguration();
     void restoreState();
     void backupConfiguration();
     void backupState();
     void erase();
     PortState& getPortState();
-    ConnectionConfiguration& getConnectionConfiguration();
+    NetworkConfiguration& getConnectionConfiguration();
     ServerConfiguration& getServerConfiguration();
+    ControllerConfiguration& getControllerConfiguration();
 };
 
 #endif
