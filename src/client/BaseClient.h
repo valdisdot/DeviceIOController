@@ -19,22 +19,27 @@ class BaseClient {
     InternalStorage &storage;
     ControllerHandler &controllerHandler;
     PortHandler &portHandler;
+    LogLevel logLevel;
+
+    char buffer[$SYSTEM.SIZE$4K];
 
     void sendState();
     void sendControllerState();
     void processMessage(const char *message, const bool &checkControllerId);
-    void processRequest(const char *name, const JsonVariant values, JsonArray responseHolder, bool &doReboot);
-    void sendResponse(const int &messageIdentity, const int &messageHash, JsonObject responseHolder);
-    void sendError(const int &messageIdentity, const int &messageHash, const char *errorType, const char *details);
+    virtual int processRequest(const char *name, const JsonVariant value, JsonArray responseHolder, bool &doReboot);
+    void sendResponse(const int &messageIdentity, JsonObject responseHolder);
+
     virtual void sendState(const char *state) = 0;
     virtual void sendControllerState(const char *controllerState) = 0;
     virtual void sendResponse(const char *response) = 0;
+    virtual void sendLog(const char *log) = 0;
 
    public:
     BaseClient(InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler);
     virtual bool initialize() = 0;
     virtual void step() = 0;
     virtual void loop();
+    virtual void log(const LogLevel& level, const char* module, const char* message, const char* details);
 };
 
 #endif

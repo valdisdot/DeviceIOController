@@ -2,177 +2,201 @@
 
 void BaseClient::sendState() {
     portHandler.pushState();
-    char buffer[CONSTANT.SIZE_1K];
-    serializeJson(storage.getPortState().getAsJson(), buffer, CONSTANT.SIZE_1K);
+    serializeJson(storage.getPortState().getAsJson(), buffer, $SYSTEM.SIZE$4K);
     sendState(buffer);
 }
 
 void BaseClient::sendControllerState() {
     controllerHandler.pushControllerState();
-    char buffer[CONSTANT.SIZE_1K];
-    serializeJsonPretty(controllerHandler.getControllerState().getAsJson(), buffer, CONSTANT.SIZE_1K);
+    serializeJsonPretty(controllerHandler.getControllerState().getAsJson(), buffer, $SYSTEM.SIZE$4K);
     sendControllerState(buffer);
 }
 
 void BaseClient::processMessage(const char* message, const bool& checkControllerId) {
-    int messageId = 0;
-    int _hashCode = hashCode(message);
     JsonDocument jsonMessage;
     DeserializationError error = deserializeJson(jsonMessage, message);
     if (error == DeserializationError::Ok) {
         if (checkControllerId) {
             // if jsonMessage[jsonSchema.ID_WORD] is not exist or (*dataExchangeJson)[jsonSchema.ID_WORD] is not equal jsonMessage[jsonSchema.ID_WORD]
-            if (!jsonMessage[SCHEMA_BASE.ID].is<const char*>() || !equal(controllerHandler.getId(), jsonMessage[SCHEMA_BASE.ID].as<const char*>())) {
+            if (!jsonMessage[JSON$MESSAGE.ID].is<const char*>() || !equal(controllerHandler.getId(), jsonMessage[JSON$MESSAGE.ID].as<const char*>())) {
                 // push error and return
-                sendError(messageId, _hashCode, "not_identified", "controller is not identified");
+                log(INFO, "BaseClient.processMessage", "controller is not identified", message);
                 return;
             }
         }
         // do not process without message_id
-        if (!jsonMessage[SCHEMA_MESSAGE.MESSAGE_ID].is<int>()) {
-            sendError(messageId, _hashCode, "not_identified", "message is not identified");
+        if (!jsonMessage[JSON$MESSAGE.MESSAGE_ID].is<int>()) {
+            log(ERROR, "BaseClient.processMessage", "message do not have an ID", message);
             return;
         }
-        messageId = jsonMessage[SCHEMA_MESSAGE.MESSAGE_ID].as<int>();
+        int messageId = jsonMessage[JSON$MESSAGE.MESSAGE_ID].as<int>();
         JsonDocument response;
         // send state and empty response-message if request isn't an array
-        if (!jsonMessage[SCHEMA_MESSAGE.REQUEST].is<JsonArray>()) {
+        if (!jsonMessage[JSON$MESSAGE.REQUEST].is<JsonArray>()) {
             sendState();
-            sendResponse(messageId, _hashCode, response.to<JsonObject>());
+            sendResponse(messageId, response.to<JsonObject>());
             return;
         }
-        JsonArray responseHolder = response[SCHEMA_MESSAGE.RESPONSE].to<JsonArray>();
+        JsonArray responseHolder = response[JSON$MESSAGE.RESPONSE].to<JsonArray>();
         bool doReboot = false;
-        for (JsonVariant request : jsonMessage[SCHEMA_MESSAGE.REQUEST].as<JsonArray>()) {
-            // do not process if requests array element isn't an object
-            if (request.is<JsonObject>())
-                // response = request's name + result, request value can be any type, depending on the request name
-                processRequest(request[SCHEMA_MESSAGE.NAME].as<const char*>(), request[SCHEMA_MESSAGE.VALUE].as<JsonVariant>(), responseHolder, doReboot);
+        for (JsonVariant request : jsonMessage[JSON$MESSAGE.REQUEST].as<JsonArray>()) {
+            if (request.is<JsonObject>()) {
+                int res = processRequest(request[JSON$MESSAGE.NAME].as<const char*>(), request[JSON$MESSAGE.VALUE].as<JsonVariant>(), responseHolder, doReboot);
+                if (logLevel <= INFO && res != $MESSAGE.RESPONSE$OK) {
+                    char req[$SYSTEM.SIZE$1K];
+                    serializeJson(request, req);
+                    if (res == $MESSAGE.RESPONSE$FAIL) {
+                        log(INFO, "BaseClient.processMessage", "failed request processing", req);
+                    } else {
+                        log(WARNING, "BaseClient.processMessage", "unknown request", req);
+                    }
+                }
+            }
+            // response = request's name + result, request value can be any type, depending on the request name
         }
-        sendResponse(messageId, _hashCode, response.as<JsonObject>());
+        sendResponse(messageId, response.as<JsonObject>());
         if (doReboot) controllerHandler.reboot();
-    } else if (error == DeserializationError::EmptyInput)
-        sendError(messageId, _hashCode, "message_processing", "message is empty");
-    else if (error == DeserializationError::IncompleteInput)
-        sendError(messageId, _hashCode, "message_processing", "message is not complete or too big");
-    else if (error == DeserializationError::NoMemory)
-        sendError(messageId, _hashCode, "message_processing", "message is too big or controller has no memory");
-    else if (error == DeserializationError::TooDeep)
-        sendError(messageId, _hashCode, "message_processing", "message has no-conventional structure or is too deep");
-    else if (error == DeserializationError::InvalidInput)
-        sendError(messageId, _hashCode, "message_processing", "message is invalid or is not a json");
-    else
-        sendError(messageId, _hashCode, "message_processing", "massage processing has unknown error");
+    } else {
+        if (error == DeserializationError::EmptyInput)
+            log(ERROR, "BaseClient.processMessage", "message is empty", message);
+        else if (error == DeserializationError::IncompleteInput)
+            log(ERROR, "BaseClient.processMessage", "message is not complete or too big", message);
+        else if (error == DeserializationError::NoMemory)
+            log(ERROR, "BaseClient.processMessage", "message is too big or controller has no memory", message);
+        else if (error == DeserializationError::TooDeep)
+            log(ERROR, "BaseClient.processMessage", "message is not complete or too big", message);
+        else if (error == DeserializationError::InvalidInput)
+            log(ERROR, "BaseClient.processMessage", "message is invalid or is not a json", message);
+        else
+            log(ERROR, "BaseClient.processMessage", "massage processing finished with unknown error", message);
+    }
 }
 
-void BaseClient::processRequest(const char* name, JsonVariant values, JsonArray responseHolder, bool& doReboot) {
+int BaseClient::processRequest(const char* name, JsonVariant value, JsonArray responseHolder, bool& doReboot) {
+    int res = $MESSAGE.RESPONSE$UNDEFINED;
     if (name != nullptr) {
-        JsonDocument response;
-        response[SCHEMA_MESSAGE.NAME] = name;
         // set data
-        if (equal(REQUEST_TYPE.SET_DATA, name)) {
-            if (values.is<JsonObject>()) {
+        if (equal($MESSAGE.REQUEST$SET_DATA, name)) {
+            if (value.is<JsonObject>()) {
                 // object style data-set
-                char key[3];
-                for (int i = 0; i < CONSTANT.PORT_COUNT; ++i) {
-                    snprintf(key, 3, "%d", i);
-                    if (values[key].is<int>())
-                        storage.getPortState().setPortData(i, values[key].as<int>());
+                char key[4];
+                for (int i = 0; i < $PORT.COUNT; ++i) {
+                    snprintf(key, 4, "%d", i);
+                    if (value[key].is<int>())
+                        storage.getPortState().setPortData(i, value[key].as<int>());
                 }
                 portHandler.pullState();
                 storage.backupState();
-            } else if (values.is<JsonArray>()) {
+            } else if (value.is<JsonArray>()) {
                 // array style data-set
-                storage.getPortState().setData(values.as<JsonArray>());
+                storage.getPortState().setData(value.as<JsonArray>());
                 portHandler.pullState();
                 storage.backupState();
             }  // else treat like a simple request to fetch the data
             sendState();
-            response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_OK;
+            res = $MESSAGE.RESPONSE$OK;
             // set modes
-        } else if (equal(REQUEST_TYPE.SET_MODES, name)) {
+        } else if (equal($MESSAGE.REQUEST$SET_MODES, name)) {
             // only array with full modes is supported
-            if (values.is<JsonArray>()) {
-                storage.getPortState().setModes(values.as<JsonArray>());
+            if (value.is<JsonArray>()) {
+                storage.getPortState().setModes(value.as<JsonArray>());
                 portHandler.pullState();
                 storage.backupState();
-                response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_OK;
+                res = $MESSAGE.RESPONSE$OK;
             } else {
-                response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_FAIL;
+                res = $MESSAGE.RESPONSE$FAIL;
             }
-        } else if (equal(REQUEST_TYPE.CONFIGURE_CONNECTION, name)) {
-            if (values.is<JsonObject>()) {
-                //connection config
-                storage.getConnectionConfiguration().updateFromJson(values.as<JsonObject>());
-                response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_OK;
+        } else if (equal($MESSAGE.REQUEST$CONFIGURE_NETWORK, name)) {
+            if (value.is<JsonObject>()) {
+                // connection config
+                storage.getConnectionConfiguration().updateFromJson(value.as<JsonObject>());
+                res = $MESSAGE.RESPONSE$OK;
                 storage.backupConfiguration();
                 doReboot = true;
             } else {
-                response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_FAIL;
+                res = $MESSAGE.RESPONSE$FAIL;
             }
-        } else if (equal(REQUEST_TYPE.CONFIGURE_SERVER, name)) {
-            if (values.is<JsonObject>()) {
-                //server config
-                storage.getServerConfiguration().updateFromJson(values.as<JsonObject>());
-                response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_OK;
+        } else if (equal($MESSAGE.REQUEST$CONFIGURE_SERVER, name)) {
+            if (value.is<JsonObject>()) {
+                // server config
+                storage.getServerConfiguration().updateFromJson(value.as<JsonObject>());
+                res = $MESSAGE.RESPONSE$OK;
                 storage.backupConfiguration();
                 doReboot = true;
             } else {
-                response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_FAIL;
+                res = $MESSAGE.RESPONSE$FAIL;
             }
-        } else if (equal(REQUEST_TYPE.REBOOT, name)) {
-            response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_OK;
+        } else if (equal($MESSAGE.REQUEST$REBOOT, name)) {
+            res = $MESSAGE.RESPONSE$OK;
             doReboot = true;
-        } else if (equal(REQUEST_TYPE.SEND_CONTROLLER_STATE, name)) {
-            response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_OK;
+        } else if (equal($MESSAGE.REQUEST$SEND_CONTROLLER_STATE, name)) {
+            res = $MESSAGE.RESPONSE$OK;
             sendControllerState();
-        } else if (equal(REQUEST_TYPE.MAKE_BACKUP, name)) {
-            response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_OK;
+        } else if (equal($MESSAGE.REQUEST$MAKE_BACKUP, name)) {
             storage.backupConfiguration();
             storage.backupState();
-        } else {
-            response[SCHEMA_MESSAGE.RESULT] = CONSTANT.RESPONSE_UNDEFINED;
-            if(DEBUG_MODE) {
-                char buffer[CONSTANT.SIZE_2K];
-                JsonDocument doc;
-                controllerHandler.pushControllerState();
-                portHandler.pushState();
-                doc[SCHEMA_BASE.ID] = controllerHandler.getId();
-                doc[SCHEMA_STATE.MODES] = storage.getPortState().getModesAsJson();
-                doc[SCHEMA_STATE.DATA] = storage.getPortState().getDataAsJson();
-                doc[SCHEMA_BASE.CONTROLLER] = controllerHandler.getControllerState().getAsJson();
-                JsonObject config = doc[SCHEMA_BASE.CONFIGURATION].to<JsonObject>();
-                config[SCHEMA_CONNECTION_CONFIGURATION.ROOT] = storage.getConnectionConfiguration().getAsJson();
-                config[SCHEMA_SERVER_CONFIGURATION.ROOT] = storage.getServerConfiguration().getAsJson();
-                serializeJsonPretty(doc, buffer, CONSTANT.SIZE_2K);
-                sendResponse(buffer);
+            res = $MESSAGE.RESPONSE$OK;
+        } else if (equal($MESSAGE.REQUEST$CONFIGURE_CONTROLLER, name)) {
+            if (value.is<JsonObject>()) {
+                // controller config
+                ControllerConfiguration &controllerConfiguration = storage.getControllerConfiguration();
+                controllerConfiguration.updateFromJson(value.as<JsonObject>());
+                logLevel = controllerConfiguration.getLogLevel();
+                res = $MESSAGE.RESPONSE$OK;
+                storage.backupConfiguration();
+            } else {
+                res = $MESSAGE.RESPONSE$FAIL;
             }
-        } 
-        responseHolder.add(response);
+        }
+        JsonObject response = responseHolder.add<JsonObject>();
+        response[JSON$MESSAGE.NAME] = name;
+        response[JSON$MESSAGE.RESULT] = res;
     }
+    return res;
 }
 
-void BaseClient::sendResponse(const int& messageIdentity, const int& messageHash, JsonObject responseHolder) {
-    responseHolder[SCHEMA_MESSAGE.MESSAGE_ID] = messageIdentity;
-    responseHolder[SCHEMA_MESSAGE.MESSAGE_HASH] = messageHash;
-    char buffer[CONSTANT.SIZE_1K];
-    serializeJsonPretty(responseHolder, buffer, CONSTANT.SIZE_1K);
+void BaseClient::sendResponse(const int& messageIdentity, JsonObject responseHolder) {
+    responseHolder[JSON$MESSAGE.TIMESTAMP] = millis();
+    responseHolder[JSON$MESSAGE.MESSAGE_ID] = messageIdentity;
+    serializeJsonPretty(responseHolder, buffer, $SYSTEM.SIZE$4K);
     sendResponse(buffer);
 }
 
-void BaseClient::sendError(const int& messageId, const int& messageHash, const char* errorType, const char* details) {
-    JsonDocument json;
-    json[SCHEMA_MESSAGE.MESSAGE_ID] = messageId;
-    json[SCHEMA_MESSAGE.MESSAGE_HASH] = messageHash;
-    json[SCHEMA_MESSAGE.TYPE] = errorType;
-    json[SCHEMA_MESSAGE.DETAILS] = details;
-    char buffer[CONSTANT.SIZE_512];
-    serializeJsonPretty(json, buffer, CONSTANT.SIZE_1K);
-    sendResponse(buffer);
+void BaseClient::log(const LogLevel& level, const char* module, const char* message, const char* details) {
+    unsigned long timestamp = millis();
+    if (level >= logLevel && (module || message || details)) {
+        JsonDocument log;
+        char buffer[$SYSTEM.SIZE$4K];
+        const char* _level;
+        switch (level) {
+            case DEBUG:
+                _level = $LOG.DEBUG$STRING;
+                break;
+            case INFO:
+                _level = $LOG.INFO$STRING;
+                break;
+            case WARNING:
+                _level = $LOG.WARNING$STRING;
+                break;
+            case ERROR:
+                _level = $LOG.ERROR$STRING;
+                break;
+            default:
+                break;
+        }
+        log[JSON$MESSAGE.TIMESTAMP] = timestamp;
+        log[JSON$LOG.LEVEL] = _level;
+        if (module) log[JSON$LOG.MODULE] = module;
+        if (message) log[JSON$LOG.MESSAGE] = message;
+        if (details) log[JSON$LOG.CAUSE] = details;
+        serializeJsonPretty(log, buffer);
+        sendLog(buffer);
+    }
 }
 
 BaseClient::BaseClient(InternalStorage& storage, ControllerHandler& controllerHandler, PortHandler& portHandler)
     : storage(storage), controllerHandler(controllerHandler), portHandler(portHandler) {
+    logLevel = storage.getControllerConfiguration().getLogLevel();
 }
 
 void BaseClient::loop() {
