@@ -4,11 +4,12 @@ Boot::Boot() : portState(),
                controllerState(),
                connectionConfiguration(),
                serverConfiguration(),
-               storage(portState, connectionConfiguration, serverConfiguration),
+               controllerConfiguration(),
+               storage(portState, connectionConfiguration, serverConfiguration, controllerConfiguration),
                portHandler(portState),
                controllerHandler(controllerState),
-               mainTaskHandler(TASK_CONSTANT.MAIN_CORE),
-               backgroundTaskHandler(TASK_CONSTANT.BACKGROUND_CORE) {}
+               mainTaskHandler($TASK.CORE$MAIN),
+               backgroundTaskHandler($TASK.CORE$BACKGROUND) {}
 
 void Boot::start() {
     storage.restoreConfiguration();
@@ -16,28 +17,49 @@ void Boot::start() {
     portHandler.pullState();
     portHandler.pushState();
     int mode = connectionConfiguration.getMode();
-
-    if (mode == CONSTANT.CONNECTION_MODE_SERIAL) {
-        Serial.begin(38400);
-        client = new SerialClient(storage, controllerHandler, portHandler, Serial);
-    } else {
-        int transmissionInterval = connectionConfiguration.getTransmissionInterval();
-        // make a task to pushMessages if mode is not serial (not one-chanel client's)
-        // here!
-        if (mode == CONSTANT.CONNECTION_MODE_WIFI) {
-            // init mqtt-client with wifi
-        } else if (mode == CONSTANT.CONNECTION_MODE_CELLULAR) {
-            // init mqtt-client with cellurar
-        }  // other clients
-    }
-    if (client) {
-        while (!client->initialize()) {
+    if (mode == $NETWORK.MODE$SERIAL) client = new SerialClient(storage, controllerHandler, portHandler, Serial);
+    else {
+        if (mode == $NETWORK.MODE$WIFI) {
+            // init WiFi
+            WiFi.mode(WIFI_STA);
+            WiFi.begin(connectionConfiguration.getSSID(), connectionConfiguration.getPassword());
+            // try to connect CONNECTION_ATTEMPTS times
+            for (int i = 0; i < $NETWORK.CONNECTION_ATTEMPTS; ++i) {
+                if (WiFi.status() != WL_CONNECTED) delay(1000);
+            }
+            // if wifi-connected
+            if (WiFi.status() == WL_CONNECTED) {
+                controllerState.setSerialState(false);
+                controllerState.setWiFiState(true);
+                controllerState.setCellularState(false);
+                // if has a CA certificate from a mqtt-broker
+                if (serverConfiguration.isSecure()) {
+                    WiFiClientSecure *secureClient = new WiFiClientSecure();
+                    secureClient->setCACert(serverConfiguration.getCertificate());
+                    networkClient = secureClient;
+                } else {
+                    networkClient = new WiFiClient();
+                }
+            }
+        } else if (mode == $NETWORK.MODE$CELLULAR) {
+            if (serverConfiguration.isSecure()) {
+                // FUTURE #2: cheap GSM module (SIM800C/L) + TinyGSM library + serverConfiguration.getCertificate();
+            } else {
+                // FUTURE #1: cheap GSM module + TinyGSM library
+            }
+        } 
+        // if networkClient is initialized
+        if (networkClient) {
+            client = new MqttClient(storage, controllerHandler, portHandler, *networkClient);
         }
+        // client is null or failed to initialize -> fall into the serial mode
+        else client = new SerialClient(storage, controllerHandler, portHandler, Serial);
+    }
+    if (client->initialize()) {
         backgroundTaskHandler.create(new PortHandlerStatefulCollectorTask(portHandler));
         backgroundTaskHandler.create(new BackupTask(storage));
         mainTaskHandler.create(new ClientRunnerTask(*client));
     } else {
-        ESP_LOGE("Initialization error", "Client is not initialized, no instanse was found for mode: %d", mode);
-        abort();
+        controllerHandler.reboot(); // fall into reboot as long as client's initialization fails
     }
 }
