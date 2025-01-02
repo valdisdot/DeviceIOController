@@ -4,10 +4,10 @@ PortHandlerStatefulCollectorTask::PortHandlerStatefulCollectorTask(PortHandler& 
     : Task(
           "stateful_collector_task",
           0,
-          TASK_CONSTANT.PORT_HANDLER_STATEFUL_COLLECTOR_TASK_DELAY,
-          TASK_CONSTANT.TASK_TYPE_CYCLIC,
-          TASK_CONSTANT.PORT_HANDLER_STATEFUL_COLLECTOR_TASK_STACK_SIZE,
-          TASK_CONSTANT.PORT_HANDLER_STATEFUL_COLLECTOR_TASK_PRIORITY),
+          $TASK.TASK$PORT_HANDLER$STATEFUL_COLLECTOR$DELAY,
+          $TASK.TYPE$CYCLIC,
+          $TASK.TASK$PORT_HANDLER$STATEFUL_COLLECTOR$STACK_SIZE,
+          $TASK.TASK$PORT_HANDLER$STATEFUL_COLLECTOR$PRIORITY),
       portHandler(portHandler) {}
 
 void PortHandlerStatefulCollectorTask::execute() {
@@ -18,10 +18,10 @@ BackupTask::BackupTask(InternalStorage& storage)
     : Task(
           "data_exchanger_saver_task",
           0,
-          TASK_CONSTANT.INTERNAL_STORAGE_TASK_DELAY,
-          TASK_CONSTANT.TASK_TYPE_CYCLIC,
-          TASK_CONSTANT.INTERNAL_STORAGE_TASK_STACK_SIZE,
-          TASK_CONSTANT.INTERNAL_STORAGE_TASK_PRIORITY),
+          $TASK.TASK$INTERNAL_STORAGE$DELAY,
+          $TASK.TYPE$CYCLIC,
+          $TASK.TASK$INTERNAL_STORAGE$STACK_SIZE,
+          $TASK.TASK$INTERNAL_STORAGE$PRIORITY),
       storage(storage) {}
 
 void BackupTask::execute() {
@@ -33,10 +33,10 @@ ClientRunnerTask::ClientRunnerTask(BaseClient& client)
     : Task(
           "client_runner_task",
           0,
-          TASK_CONSTANT.CLIENT_RUNNER_TASK_DELAY,
-          TASK_CONSTANT.TASK_TYPE_CYCLIC,
-          TASK_CONSTANT.CLIENT_RUNNER_TASK_STACK_SIZE,
-          TASK_CONSTANT.CLIENT_RUNNER_TASK_PRIORITY),
+          $TASK.TASK$CLIENT_RUNNER$DELAY,
+          $TASK.TYPE$CYCLIC,
+          $TASK.TASK$CLIENT_RUNNER$STACK_SIZE,
+          $TASK.TASK$CLIENT_RUNNER$PRIORITY),
       client(client) {}
 
 void ClientRunnerTask::execute() {
