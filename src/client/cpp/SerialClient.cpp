@@ -19,10 +19,15 @@ void SerialClient::sendResponse(const char *response) {
     send(response);
 }
 
+void SerialClient::sendLog(const char *log) {
+    send(log);
+}
+
 SerialClient::SerialClient(InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, HardwareSerial &serial)
     : BaseClient(storage, controllerHandler, portHandler), serial(serial) {}
 
 bool SerialClient::initialize() {
+    serial.begin($NETWORK.SERIAL$BAUD_RATE);
     storage.restoreConfiguration();
     unsigned long start = millis();
     while (!serial && millis() - start < 1000) { /*wait untill ready plus 2 seconds*/
@@ -38,13 +43,11 @@ bool SerialClient::initialize() {
 
 void SerialClient::step() {
     if (serial.available() > 0) {
-        int length = 512;
-        char buffer[length];
         int i = 0;
-        while (serial.available() > 0 && i < length) {
+        while (serial.available() > 0 && i < $SYSTEM.SIZE$4K) {
             buffer[i++] = (char) serial.read();
         }
-        buffer[i > length ? i - 1 : i] = '\0';
+        buffer[i > $SYSTEM.SIZE$4K ? i - 1 : i] = '\0';
         processMessage(buffer, true);
     }
 }
