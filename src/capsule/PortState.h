@@ -6,8 +6,6 @@
 class PortState {
    private:
     JsonDocument holder;
-    void eraseModes();
-    void eraseData();
 
    public:
     PortState();
