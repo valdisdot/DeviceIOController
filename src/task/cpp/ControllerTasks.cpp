@@ -18,10 +18,10 @@ BackupTask::BackupTask(InternalStorage& storage)
     : Task(
           "data_exchanger_saver_task",
           0,
-          $TASK.TASK$INTERNAL_STORAGE$DELAY,
+          $TASK.TASK$STORAGE_BACKUP$DELAY,
           $TASK.TYPE$CYCLIC,
-          $TASK.TASK$INTERNAL_STORAGE$STACK_SIZE,
-          $TASK.TASK$INTERNAL_STORAGE$PRIORITY),
+          $TASK.TASK$STORAGE_BACKUP$STACK_SIZE,
+          $TASK.TASK$STORAGE_BACKUP$PRIORITY),
       storage(storage) {}
 
 void BackupTask::execute() {

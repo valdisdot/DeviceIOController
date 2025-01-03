@@ -223,7 +223,7 @@ int TaskHandler::getState(const int& taskId) {
                     case eReady:
                         return $TASK.STATE$AWAITS_IN_QUEUE;
                     case eBlocked:
-                        return $TASK.STATE$AWAINTS_NOTIFICATION;
+                        return $TASK.STATE$AWAITS_NOTIFICATION;
                     case eSuspended:
                         return $TASK.STATE$SUSPENDED;
                     case eDeleted:
