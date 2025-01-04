@@ -172,6 +172,8 @@ struct MessageConstant {
     const char* REQUEST$REBOOT = "reboot";
     /// Request to send controller state.
     const char* REQUEST$SEND_CONTROLLER_STATE = "send_controller_state";
+    /// Request to send state (data from the ports).
+    const char* REQUEST$SEND_STATE = "send_state";
     /// Request to make a backup.
     const char* REQUEST$MAKE_BACKUP = "make_backup";
 };
