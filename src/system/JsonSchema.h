@@ -16,13 +16,9 @@ struct StateSchema {
  */
 struct ControllerStateSchema {
     /// Key for state.
-    const char* STATE = "state";
-    /// Key for Wi-Fi state.
-    const char* STATE$WIFI = "wifi";
-    /// Key for cellular state.
-    const char* STATE$CELLULAR = "cellular";
-    /// Key for serial state.
-    const char* STATE$SERIAL = "serial";
+    const char* MODE = "mode";
+    /// Key for signal strenght.
+    const char* SIGNAL_STRENGTH = "signal_strength";
     /// Key for memory size.
     const char* MEMORY = "memory";
     /// Key for reboot reason.
@@ -79,8 +75,6 @@ struct ControllerConfigurationSchema {
 struct MessageSchema {
     /// Key for timestamp.
     const char* TIMESTAMP = "timestamp";
-    /// Key for ID.
-    const char* ID = "id";
     /// Key for message ID.
     const char* MESSAGE_ID = "message_id";
     /// Key for request.
@@ -89,10 +83,10 @@ struct MessageSchema {
     const char* NAME = "name";
     /// Key for value.
     const char* VALUE = "value";
-    /// Key for result.
-    const char* RESULT = "result";
     /// Key for response.
     const char* RESPONSE = "response";
+    /// Key for result.
+    const char* RESULT = "result";
 };
 
 /**
