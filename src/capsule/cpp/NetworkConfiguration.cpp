@@ -34,7 +34,7 @@ void NetworkConfiguration::updateFromJson(JsonObjectConst configuration) {
             int mode = configuration[JSON$NETWORK_CONFIGURATION.MODE];
             if(mode < $NETWORK.MODE$SERIAL || mode > $NETWORK.MODE$CELLULAR) mode = $NETWORK.MODE$SERIAL;
             holder[JSON$NETWORK_CONFIGURATION.MODE] = mode;
-        } else holder[JSON$NETWORK_CONFIGURATION.MODE] = $NETWORK.MODE$SERIAL;
+        }
         if (configuration[JSON$NETWORK_CONFIGURATION.SSID].is<const char*>()) holder[JSON$NETWORK_CONFIGURATION.SSID] = configuration[JSON$NETWORK_CONFIGURATION.SSID];
         if (configuration[JSON$NETWORK_CONFIGURATION.PASSWORD].is<const char*>()) holder[JSON$NETWORK_CONFIGURATION.PASSWORD] = configuration[JSON$NETWORK_CONFIGURATION.PASSWORD];
         if (configuration[JSON$NETWORK_CONFIGURATION.APN_NAME].is<const char*>()) holder[JSON$NETWORK_CONFIGURATION.APN_NAME] = configuration[JSON$NETWORK_CONFIGURATION.APN_NAME];
