@@ -58,6 +58,7 @@ void Boot::start() {
             mode = $NETWORK.MODE$SERIAL;
         }
     }
+    controllerState.setMode(mode);
     backgroundTaskHandler.create(new MemoryCollector(controllerState));
     backgroundTaskHandler.create(new PortHandlerStatefulCollectorTask(portHandler));
     backgroundTaskHandler.create(new BackupTask(storage));
