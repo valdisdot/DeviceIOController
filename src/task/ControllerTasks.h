@@ -6,6 +6,7 @@
 #include "client/BaseClient.h"
 #include "service/PortHandler.h"
 #include "service/InternalStorage.h"
+#include <WiFi.h>
 
 class PortHandlerStatefulCollectorTask : public Task {
    private:
@@ -33,6 +34,26 @@ class ClientRunnerTask : public Task {
     ClientRunnerTask(BaseClient& client);
 
     void execute() override;
+};
+
+class MemoryCollector : public Task {
+    private:
+    ControllerState& controllerState;
+
+    public:
+    MemoryCollector(ControllerState& controllerState);
+
+    void execute() override;  
+};
+
+class WiFiSignalStrengthCollector : public Task {
+    private:
+    ControllerState& controllerState;
+
+    public:
+    WiFiSignalStrengthCollector(ControllerState& controllerState);
+
+    void execute() override;  
 };
 
 #endif

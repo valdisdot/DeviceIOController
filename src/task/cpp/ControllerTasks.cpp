@@ -42,3 +42,31 @@ ClientRunnerTask::ClientRunnerTask(BaseClient& client)
 void ClientRunnerTask::execute() {
     client.step();
 }
+
+MemoryCollector::MemoryCollector(ControllerState& controllerState)
+    : Task(
+          "memory_collector",
+          0,
+          $TASK.TASK$MEMORY_COLLECTOR$DELAY,
+          $TASK.TYPE$CYCLIC,
+          $TASK.TASK$MEMORY_COLLECTOR$STACK_SIZE,
+          $TASK.TASK$MEMORY_COLLECTOR$PRIORITY),
+      controllerState(controllerState) {}
+
+void MemoryCollector::execute() {
+    controllerState.setMemory(esp_get_free_heap_size());
+}
+
+WiFiSignalStrengthCollector::WiFiSignalStrengthCollector(ControllerState& controllerState) 
+    : Task(
+          "signal_strength_collector",
+          0,
+          $TASK.TASK$SIGNAL_STRENGTH_COLLECTOR$DELAY,
+          $TASK.TYPE$CYCLIC,
+          $TASK.TASK$SIGNAL_STRENGTH_COLLECTOR$STACK_SIZE,
+          $TASK.TASK$SIGNAL_STRENGTH_COLLECTOR$PRIORITY),
+      controllerState(controllerState) {}
+
+void WiFiSignalStrengthCollector::execute() {
+    controllerState.setSignalStrength(WiFi.RSSI());
+}
