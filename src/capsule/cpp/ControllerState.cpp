@@ -1,51 +1,42 @@
 #include "capsule/ControllerState.h"
 
 ControllerState::ControllerState() {
-    holder[JSON$CONTROLLER_STATE.STATE].to<JsonObject>()[JSON$CONTROLLER_STATE.STATE$WIFI] = false;
-    holder[JSON$CONTROLLER_STATE.STATE].as<JsonObject>()[JSON$CONTROLLER_STATE.STATE$CELLULAR] = false;
-    holder[JSON$CONTROLLER_STATE.STATE].as<JsonObject>()[JSON$CONTROLLER_STATE.STATE$SERIAL] = false;
+    holder[JSON$CONTROLLER_STATE.MODE] = $SYSTEM.NO_VALUE$INT;
+    holder[JSON$CONTROLLER_STATE.SIGNAL_STRENGTH] = $SYSTEM.NO_VALUE$INT;
     holder[JSON$CONTROLLER_STATE.MEMORY] = $SYSTEM.NO_VALUE$INT;
-    holder[JSON$CONTROLLER_STATE.REBOOT_REASON] = $SYSTEM.NO_VALUE$STR;
+    holder[JSON$CONTROLLER_STATE.REBOOT_REASON] = $SYSTEM.NO_VALUE$INT;
 }
 
-void ControllerState::setWiFiState(bool state) {
-    holder[JSON$CONTROLLER_STATE.STATE].as<JsonObject>()[JSON$CONTROLLER_STATE.STATE$WIFI] = state;
+void ControllerState::setMode(int mode) {
+    holder[JSON$CONTROLLER_STATE.MODE] = mode;
 }
 
-void ControllerState::setCellularState(bool state) {
-    holder[JSON$CONTROLLER_STATE.STATE].as<JsonObject>()[JSON$CONTROLLER_STATE.STATE$CELLULAR] = state;
+void ControllerState::setSignalStrength(int signalStrength) {
+    holder[JSON$CONTROLLER_STATE.SIGNAL_STRENGTH] = signalStrength;
 }
 
-void ControllerState::setSerialState(bool state) {
-    holder[JSON$CONTROLLER_STATE.STATE].as<JsonObject>()[JSON$CONTROLLER_STATE.STATE$SERIAL] = state;
+void ControllerState::setMemory(int memory) {
+    holder[JSON$CONTROLLER_STATE.MEMORY] = memory;
 }
 
-void ControllerState::setMemory(int state) {
-    holder[JSON$CONTROLLER_STATE.MEMORY] = state;
+void ControllerState::setLastRebootReason(int rebootReason) {
+    holder[JSON$CONTROLLER_STATE.REBOOT_REASON] = rebootReason;
 }
 
-void ControllerState::setLastRebootReason(const char* reason) {
-    holder[JSON$CONTROLLER_STATE.REBOOT_REASON] = reason;
+int ControllerState::getMode() {
+    return holder[JSON$CONTROLLER_STATE.MODE].as<int>();
 }
 
-bool ControllerState::getWiFiState() {
-    return holder[JSON$CONTROLLER_STATE.STATE].as<JsonObject>()[JSON$CONTROLLER_STATE.STATE$WIFI].as<bool>();
-}
-
-bool ControllerState::getCellularState() {
-    return holder[JSON$CONTROLLER_STATE.STATE].as<JsonObject>()[JSON$CONTROLLER_STATE.STATE$CELLULAR].as<bool>();
-}
-
-bool ControllerState::getSerialState() {
-    return holder[JSON$CONTROLLER_STATE.STATE].as<JsonObject>()[JSON$CONTROLLER_STATE.STATE$SERIAL].as<bool>();
+int ControllerState::getSignalStrenght() {
+    return holder[JSON$CONTROLLER_STATE.SIGNAL_STRENGTH].as<int>();
 }
 
 int ControllerState::getMemory() {
     return holder[JSON$CONTROLLER_STATE.MEMORY].as<int>();
 }
 
-const char* ControllerState::getLastRebootReason() {
-    return holder[JSON$CONTROLLER_STATE.REBOOT_REASON].as<const char*>();
+int ControllerState::getLastRebootReason() {
+    return holder[JSON$CONTROLLER_STATE.REBOOT_REASON].as<int>();
 }
 
 JsonObjectConst ControllerState::getAsJson() {

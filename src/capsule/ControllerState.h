@@ -9,16 +9,14 @@ class ControllerState {
 
    public:
    ControllerState();
-    void setWiFiState(bool state);
-    void setCellularState(bool state);
-    void setSerialState(bool state);
-    void setMemory(int state);
-    void setLastRebootReason(const char *reason);
-    bool getWiFiState();
-    bool getCellularState();
-    bool getSerialState();
+    void setMode(int mode);
+    void setSignalStrength(int signalStrength);
+    void setMemory(int memoryBytes);
+    void setLastRebootReason(int rebootReason);
+    int getMode();
+    int getSignalStrenght();
     int getMemory();
-    const char* getLastRebootReason();
+    int getLastRebootReason();
     JsonObjectConst getAsJson();
 };
 
