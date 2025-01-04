@@ -23,8 +23,8 @@ void SerialClient::sendLog(const char *log) {
     send(log);
 }
 
-SerialClient::SerialClient(InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, HardwareSerial &serial)
-    : BaseClient(storage, controllerHandler, portHandler), serial(serial) {}
+SerialClient::SerialClient(InternalStorage &storage, ControllerState &controllerState, PortHandler &portHandler, HardwareSerial &serial)
+    : BaseClient(storage, controllerState, portHandler), serial(serial) {}
 
 bool SerialClient::initialize() {
     serial.begin($NETWORK.SERIAL$BAUD_RATE);
@@ -33,11 +33,8 @@ bool SerialClient::initialize() {
     while (!serial && millis() - start < 1000) { /*wait untill ready plus 2 seconds*/
     }
     while (serial.available() > 0) {
-        serial.read();  //clear any garbage data
+        serial.read();  // clear any garbage data
     }
-    controllerHandler.getControllerState().setSerialState(true);
-    controllerHandler.getControllerState().setWiFiState(false);
-    controllerHandler.getControllerState().setCellularState(false);
     return true;
 }
 
@@ -45,9 +42,17 @@ void SerialClient::step() {
     if (serial.available() > 0) {
         int i = 0;
         while (serial.available() > 0 && i < $SYSTEM.SIZE$4K) {
-            buffer[i++] = (char) serial.read();
+            buffer[i++] = (char)serial.read();
         }
         buffer[i > $SYSTEM.SIZE$4K ? i - 1 : i] = '\0';
-        processMessage(buffer, true);
+        if (unlocked) {
+            processMessage(buffer);
+        } else {
+            unlocked = equal(buffer, id);
+            if(unlocked) log(INFO, "SERIAL_CLIENT", "Access unlocked", nullptr);
+            else log(ERROR, "SERIAL_CLIENT", "Access denied", nullptr);
+        }
+    } else if(unlocked) {
+        BaseClient::step();
     }
 }

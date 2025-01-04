@@ -6,7 +6,9 @@
 class SerialClient : public BaseClient {
    private:
     const char *DIVIDER = "\n#END#\n"; 
-    HardwareSerial &serial;            
+    HardwareSerial &serial; 
+
+    bool unlocked = false;           
 
     void send(const char *data);
 
@@ -17,7 +19,7 @@ class SerialClient : public BaseClient {
     void sendLog(const char *log) override;
 
    public:
-    SerialClient(InternalStorage &storage, ControllerHandler &controllerHandler, PortHandler &portHandler, HardwareSerial &serial);
+    SerialClient(InternalStorage &storage, ControllerState &controllerState, PortHandler &portHandler, HardwareSerial &serial);
     bool initialize() override;
     void step() override;
 };
