@@ -122,8 +122,8 @@ int BaseClient::processRequest(const char* name, JsonVariant value, JsonArray re
             res = $MESSAGE.RESPONSE$OK;
             doReboot = true;
         } else if (equal($MESSAGE.REQUEST$SEND_CONTROLLER_STATE, name)) {
-            res = $MESSAGE.RESPONSE$OK;
             sendControllerState();
+            res = $MESSAGE.RESPONSE$OK;
         } else if (equal($MESSAGE.REQUEST$MAKE_BACKUP, name)) {
             storage.backupConfiguration();
             storage.backupState();
@@ -134,11 +134,14 @@ int BaseClient::processRequest(const char* name, JsonVariant value, JsonArray re
                 ControllerConfiguration& controllerConfiguration = storage.getControllerConfiguration();
                 controllerConfiguration.updateFromJson(value.as<JsonObject>());
                 logLevel = controllerConfiguration.getLogLevel();
-                res = $MESSAGE.RESPONSE$OK;
                 storage.backupConfiguration();
+                res = $MESSAGE.RESPONSE$OK;
             } else {
                 res = $MESSAGE.RESPONSE$FAIL;
             }
+        } else if(equal($MESSAGE.REQUEST$SEND_STATE, name)) {
+            sendState();
+            res = $MESSAGE.RESPONSE$OK;
         }
         JsonObject response = responseHolder.add<JsonObject>();
         response[JSON$MESSAGE.NAME] = name;
