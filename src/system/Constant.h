@@ -108,15 +108,11 @@ struct TaskConstant {
     /// Background core identifier.
     const int CORE$BACKGROUND = 1;
 
-    /// Stack size for port handler state collector task.
-    const int TASK$PORT_HANDLER$STATE_COLLECTOR$STACK_SIZE = 4048;
     /// Default transmission interval for port handler state collector task.
     const int TASK$PORT_HANDLER$STATE_COLLECTOR$DEFAULT_TRANSMISSION_INTERVAL = 1000;
-    /// Priority for port handler state collector task.
-    const int TASK$PORT_HANDLER$STATE_COLLECTOR$PRIORITY = PRIOTITY$HIGH;
 
     /// Stack size for stateful port data collector task.
-    const int TASK$PORT_HANDLER$STATEFUL_COLLECTOR$STACK_SIZE = 4048;
+    const int TASK$PORT_HANDLER$STATEFUL_COLLECTOR$STACK_SIZE = 8192;
     /// Delay for stateful port data collector task.
     const int TASK$PORT_HANDLER$STATEFUL_COLLECTOR$DELAY = 10;
     /// Priority for stateful port data collector task.
@@ -128,6 +124,20 @@ struct TaskConstant {
     const int TASK$STORAGE_BACKUP$DELAY = 10000;
     /// Priority for storage backup task.
     const int TASK$STORAGE_BACKUP$PRIORITY = PRIOTITY$MIDDLE;
+
+    /// Stack size for free memory collector task.
+    const int TASK$MEMORY_COLLECTOR$STACK_SIZE = 8192;
+    /// Delay for free memory collector task.
+    const int TASK$MEMORY_COLLECTOR$DELAY = 60000; //ones per minute
+    /// Priority for free memory collector task.
+    const int TASK$MEMORY_COLLECTOR$PRIORITY = PRIOTITY$HIGH;
+
+    /// Stack size for free memory collector task.
+    const int TASK$SIGNAL_STRENGTH_COLLECTOR$STACK_SIZE = 8192;
+    /// Delay for free memory collector task.
+    const int TASK$SIGNAL_STRENGTH_COLLECTOR$DELAY = 60000; //ones per minute
+    /// Priority for free memory collector task.
+    const int TASK$SIGNAL_STRENGTH_COLLECTOR$PRIORITY = PRIOTITY$HIGH;
 
     /// Stack size for client runner task.
     const int TASK$CLIENT_RUNNER$STACK_SIZE = 16384;
