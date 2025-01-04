@@ -7,72 +7,64 @@ void BaseClient::sendState() {
 }
 
 void BaseClient::sendControllerState() {
-    controllerHandler.pushControllerState();
-    serializeJsonPretty(controllerHandler.getControllerState().getAsJson(), buffer, $SYSTEM.SIZE$4K);
+    serializeJsonPretty(controllerState.getAsJson(), buffer, $SYSTEM.SIZE$4K);
     sendControllerState(buffer);
 }
 
-void BaseClient::processMessage(const char* message, const bool& checkControllerId) {
+void BaseClient::processMessage(const char* message) {
     JsonDocument jsonMessage;
     DeserializationError error = deserializeJson(jsonMessage, message);
     if (error == DeserializationError::Ok) {
-        if (checkControllerId) {
-            // if jsonMessage[jsonSchema.ID_WORD] is not exist or (*dataExchangeJson)[jsonSchema.ID_WORD] is not equal jsonMessage[jsonSchema.ID_WORD]
-            if (!jsonMessage[JSON$MESSAGE.ID].is<const char*>() || !equal(controllerHandler.getId(), jsonMessage[JSON$MESSAGE.ID].as<const char*>())) {
-                // push error and return
-                log(INFO, "BaseClient.processMessage", "controller is not identified", message);
-                return;
-            }
-        }
         // do not process without message_id
         if (!jsonMessage[JSON$MESSAGE.MESSAGE_ID].is<int>()) {
-            log(ERROR, "BaseClient.processMessage", "message do not have an ID", message);
+            log(ERROR, "CLIENT.MESSAGE", "Message doesn't have the ID", message);
             return;
         }
         int messageId = jsonMessage[JSON$MESSAGE.MESSAGE_ID].as<int>();
-        JsonDocument response;
-        // send state and empty response-message if request isn't an array
+        JsonDocument responseMessage;
+        // send state and empty response-message if request isn't an array, log
         if (!jsonMessage[JSON$MESSAGE.REQUEST].is<JsonArray>()) {
-            sendState();
-            sendResponse(messageId, response.to<JsonObject>());
+            log(ERROR, "CLIENT.MESSAGE", "Message doesn't have the request's array", message);
+            sendResponse(messageId, responseMessage.to<JsonObject>());
             return;
         }
-        JsonArray responseHolder = response[JSON$MESSAGE.RESPONSE].to<JsonArray>();
+        JsonArray responsesArray = responseMessage[JSON$MESSAGE.RESPONSE].to<JsonArray>();
         bool doReboot = false;
         for (JsonVariant request : jsonMessage[JSON$MESSAGE.REQUEST].as<JsonArray>()) {
             if (request.is<JsonObject>()) {
-                int res = processRequest(request[JSON$MESSAGE.NAME].as<const char*>(), request[JSON$MESSAGE.VALUE].as<JsonVariant>(), responseHolder, doReboot);
+                int res = processRequest(request[JSON$MESSAGE.NAME].as<const char*>(), request[JSON$MESSAGE.VALUE].as<JsonVariant>(), responsesArray, doReboot);
                 if (logLevel <= INFO && res != $MESSAGE.RESPONSE$OK) {
                     char req[$SYSTEM.SIZE$1K];
                     serializeJson(request, req);
                     if (res == $MESSAGE.RESPONSE$FAIL) {
-                        log(INFO, "BaseClient.processMessage", "failed request processing", req);
+                        log(WARNING, "CLIENT.MESSAGE.REQUEST", "Request wasn't processed", req);
                     } else {
-                        log(WARNING, "BaseClient.processMessage", "unknown request", req);
+                        log(ERROR, "CLIENT.MESSAGE.REQUEST", "Request isn't known", req);
                     }
                 }
             }
             // response = request's name + result, request value can be any type, depending on the request name
         }
-        sendResponse(messageId, response.as<JsonObject>());
-        if (doReboot) controllerHandler.reboot();
+        sendResponse(messageId, responseMessage.as<JsonObject>());
+        if (doReboot) reboot();
     } else {
         if (error == DeserializationError::EmptyInput)
-            log(ERROR, "BaseClient.processMessage", "message is empty", message);
+            log(ERROR, "CLIENT.MESSAGE", "Message is empty", message);
         else if (error == DeserializationError::IncompleteInput)
-            log(ERROR, "BaseClient.processMessage", "message is not complete or too big", message);
+            log(ERROR, "CLIENT.MESSAGE", "Message isn't complete or is too big", message);
         else if (error == DeserializationError::NoMemory)
-            log(ERROR, "BaseClient.processMessage", "message is too big or controller has no memory", message);
+            log(ERROR, "CLIENT.MESSAGE", "Message is too big or the controller is out of memory", message);
         else if (error == DeserializationError::TooDeep)
-            log(ERROR, "BaseClient.processMessage", "message is not complete or too big", message);
+            log(ERROR, "CLIENT.MESSAGE", "Message has reached the limit of nested objects", message);
         else if (error == DeserializationError::InvalidInput)
-            log(ERROR, "BaseClient.processMessage", "message is invalid or is not a json", message);
+            log(ERROR, "CLIENT.MESSAGE", "Message is invalid or isn't a json", message);
         else
-            log(ERROR, "BaseClient.processMessage", "massage processing finished with unknown error", message);
+            log(ERROR, "CLIENT.MESSAGE", "Message processing has been finished with an unknown error", message);
     }
 }
 
 int BaseClient::processRequest(const char* name, JsonVariant value, JsonArray responseHolder, bool& doReboot) {
+    // too big method, do refactoring later
     int res = $MESSAGE.RESPONSE$UNDEFINED;
     if (name != nullptr) {
         // set data
@@ -139,7 +131,7 @@ int BaseClient::processRequest(const char* name, JsonVariant value, JsonArray re
         } else if (equal($MESSAGE.REQUEST$CONFIGURE_CONTROLLER, name)) {
             if (value.is<JsonObject>()) {
                 // controller config
-                ControllerConfiguration &controllerConfiguration = storage.getControllerConfiguration();
+                ControllerConfiguration& controllerConfiguration = storage.getControllerConfiguration();
                 controllerConfiguration.updateFromJson(value.as<JsonObject>());
                 logLevel = controllerConfiguration.getLogLevel();
                 res = $MESSAGE.RESPONSE$OK;
@@ -194,11 +186,30 @@ void BaseClient::log(const LogLevel& level, const char* module, const char* mess
     }
 }
 
-BaseClient::BaseClient(InternalStorage& storage, ControllerHandler& controllerHandler, PortHandler& portHandler)
-    : storage(storage), controllerHandler(controllerHandler), portHandler(portHandler) {
+BaseClient::BaseClient(InternalStorage& storage, ControllerState& controllerState, PortHandler& portHandler)
+    : storage(storage), controllerState(controllerState), portHandler(portHandler) {
+    byte mac_base[6] = {0};
+    esp_efuse_mac_get_default(mac_base);
+    snprintf(id, sizeof(id), "%d%d%d%d%d%d", mac_base[0] ^ 127, mac_base[1] ^ 127, mac_base[2] ^ 127, mac_base[3] ^ 127, mac_base[4] ^ 127, mac_base[5] ^ 127);
     logLevel = storage.getControllerConfiguration().getLogLevel();
+    controllerState.setLastRebootReason(esp_reset_reason());
 }
 
-void BaseClient::loop() {
-    for (;;) step();
+void BaseClient::step() {
+    if (millis() - lastStateSend >= storage.getControllerConfiguration().getTransmissionInterval()) {
+        sendState();
+        lastStateSend = millis();
+    }
+}
+
+bool BaseClient::initialize() {
+    log(INFO, "CLIENT.INIT", "Successfully initialized", nullptr);
+    sendControllerState();
+    sendState();
+    return true;
+}
+
+void BaseClient::reboot() {
+    //replace with RTOS-delayed task later
+    esp_restart();
 }
