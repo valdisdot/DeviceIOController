@@ -12,8 +12,6 @@ bool MqttClient::checkConnection() {
 
 bool MqttClient::connectToServer(ServerConfiguration& serverConfiguration) {
     if (mqttClient.connect(clientId, serverConfiguration.getUser(), serverConfiguration.getPassword())) {
-        BaseClient::sendState();
-        BaseClient::sendControllerState();
         mqttClient.subscribe(requestTopic);
     }
     return mqttClient.connected();
@@ -22,7 +20,7 @@ bool MqttClient::connectToServer(ServerConfiguration& serverConfiguration) {
 void MqttClient::callback(const char* topic, byte* payload, unsigned int length) {
     if (equal(topic, requestTopic)) {
         convertToASCIIString(buffer, payload, length);
-        processMessage(buffer, false);
+        processMessage(buffer);
     }
 }
 
@@ -42,8 +40,7 @@ void MqttClient::sendLog(const char* log) {
     mqttClient.publish(logTopic, log);
 }
 
-MqttClient::MqttClient(InternalStorage& storage, ControllerHandler& controllerHandler, PortHandler& portHandler, Client& networkClient) : BaseClient(storage, controllerHandler, portHandler), networkClient(networkClient) {
-    const char* id = controllerHandler.getId();
+MqttClient::MqttClient(InternalStorage& storage, ControllerState& controllerState, PortHandler& portHandler, Client& networkClient) : BaseClient(storage, controllerState, portHandler), networkClient(networkClient) {
     const char* topicDivider = "/";
     copyString(clientId, "client-", $SYSTEM.SIZE$64);
     concatenateString(clientId, id, $SYSTEM.SIZE$64);
@@ -96,18 +93,12 @@ bool MqttClient::initialize() {
     mqttClient.setCallback([this](char* topic, byte* payload, unsigned int length) {
         this->callback(topic, payload, length);
     });
-    bool res = checkConnection();
-    log(INFO, "MqttClient.initialize", "client initialized", nullptr);
-    return res;
+    return checkConnection() && BaseClient::initialize();
 }
 
 void MqttClient::step() {
     // fall in reboot, the network client might be disconnected
-    if (!checkConnection()) controllerHandler.reboot();
-    if(millis() - lastStateSend >= storage.getControllerConfiguration().getTransmissionInterval()) {
-        BaseClient::sendState();
-        BaseClient::sendControllerState();
-        lastStateSend = millis();
-    }
+    if (!checkConnection()) reboot();
     mqttClient.loop();
+    BaseClient::step();
 }

@@ -16,8 +16,6 @@ class MqttClient : public BaseClient {
     char requestTopic[$SYSTEM.SIZE$64];
     char logTopic[$SYSTEM.SIZE$64];
 
-    unsigned long lastStateSend = 0;
-
     bool checkConnection();
     bool connectToServer(ServerConfiguration& serverConfiguration);
     void callback(const char* topic, byte* payload, unsigned int length);
@@ -29,7 +27,7 @@ class MqttClient : public BaseClient {
     void sendLog(const char* log) override;
 
    public:
-    MqttClient(InternalStorage& storage, ControllerHandler& controllerHandler, PortHandler& portHandler, Client& networkClient);
+    MqttClient(InternalStorage& storage, ControllerState& controllerState, PortHandler& portHandler, Client& networkClient);
     bool initialize() override;
     void step() override;
 };
