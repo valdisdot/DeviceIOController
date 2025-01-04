@@ -7,7 +7,6 @@ Boot::Boot() : portState(),
                controllerConfiguration(),
                storage(portState, connectionConfiguration, serverConfiguration, controllerConfiguration),
                portHandler(portState),
-               controllerHandler(controllerState),
                mainTaskHandler($TASK.CORE$MAIN),
                backgroundTaskHandler($TASK.CORE$BACKGROUND) {}
 
@@ -17,7 +16,8 @@ void Boot::start() {
     portHandler.pullState();
     portHandler.pushState();
     int mode = connectionConfiguration.getMode();
-    if (mode == $NETWORK.MODE$SERIAL) client = new SerialClient(storage, controllerHandler, portHandler, Serial);
+    if (mode == $NETWORK.MODE$SERIAL)
+        client = new SerialClient(storage, controllerState, portHandler, Serial);
     else {
         if (mode == $NETWORK.MODE$WIFI) {
             // init WiFi
@@ -29,9 +29,8 @@ void Boot::start() {
             }
             // if wifi-connected
             if (WiFi.status() == WL_CONNECTED) {
-                controllerState.setSerialState(false);
-                controllerState.setWiFiState(true);
-                controllerState.setCellularState(false);
+                // create signal strength measurement task
+                backgroundTaskHandler.create(new WiFiSignalStrengthCollector(controllerState));
                 // if has a CA certificate from a mqtt-broker
                 if (serverConfiguration.isSecure()) {
                     WiFiClientSecure *secureClient = new WiFiClientSecure();
@@ -42,24 +41,28 @@ void Boot::start() {
                 }
             }
         } else if (mode == $NETWORK.MODE$CELLULAR) {
+            // FEATURE #3 controllerState.setSignalStrength(-113 + tinyGSModem.getSignalQuality() * 2)}
             if (serverConfiguration.isSecure()) {
                 // FUTURE #2: cheap GSM module (SIM800C/L) + TinyGSM library + serverConfiguration.getCertificate();
             } else {
                 // FUTURE #1: cheap GSM module + TinyGSM library
             }
-        } 
+        }
         // if networkClient is initialized
         if (networkClient) {
-            client = new MqttClient(storage, controllerHandler, portHandler, *networkClient);
+            client = new MqttClient(storage, controllerState, portHandler, *networkClient);
         }
         // client is null or failed to initialize -> fall into the serial mode
-        else client = new SerialClient(storage, controllerHandler, portHandler, Serial);
+        else {
+            client = new SerialClient(storage, controllerState, portHandler, Serial);
+            mode = $NETWORK.MODE$SERIAL;
+        }
     }
-    if (client->initialize()) {
-        backgroundTaskHandler.create(new PortHandlerStatefulCollectorTask(portHandler));
-        backgroundTaskHandler.create(new BackupTask(storage));
+    backgroundTaskHandler.create(new MemoryCollector(controllerState));
+    backgroundTaskHandler.create(new PortHandlerStatefulCollectorTask(portHandler));
+    backgroundTaskHandler.create(new BackupTask(storage));
+    if (client->initialize())
         mainTaskHandler.create(new ClientRunnerTask(*client));
-    } else {
-        controllerHandler.reboot(); // fall into reboot as long as client's initialization fails
-    }
+    else
+        client->reboot();  // fall into reboot as long as client's initialization fails
 }

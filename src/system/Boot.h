@@ -4,7 +4,6 @@
 #include "client/BaseClient.h"
 #include "client/SerialClient.h"
 #include "client/MqttClient.h"
-#include "service/ControllerHandler.h"
 #include "service/InternalStorage.h"
 #include "service/PortHandler.h"
 #include "system/MicroSystem.h"
@@ -22,7 +21,6 @@ class Boot {
     ControllerConfiguration controllerConfiguration;
     InternalStorage storage;
     PortHandler portHandler;
-    ControllerHandler controllerHandler;
     TaskHandler mainTaskHandler;
     TaskHandler backgroundTaskHandler;
     Client *networkClient = nullptr;
