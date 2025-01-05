@@ -69,42 +69,59 @@ int BaseClient::processRequest(const char* name, JsonVariant value, JsonArray re
     if (name != nullptr) {
         // set data
         if (equal($MESSAGE.REQUEST$SET_DATA, name)) {
+            PortState &portState = storage.getPortState();
             if (value.is<JsonObject>()) {
                 // object style data-set
                 char key[4];
                 for (int i = 0; i < $PORT.COUNT; ++i) {
                     snprintf(key, 4, "%d", i);
                     if (value[key].is<int>())
-                        storage.getPortState().setPortData(i, value[key].as<int>());
+                        portState.setPortData(i, value[key].as<int>());
                 }
                 portHandler.pullState();
                 storage.backupState();
+                res = $MESSAGE.RESPONSE$OK;
             } else if (value.is<JsonArray>()) {
                 // array style data-set
-                storage.getPortState().setData(value.as<JsonArray>());
+                portState.setData(value.as<JsonArray>());
                 portHandler.pullState();
                 storage.backupState();
-            }  // else treat like a simple request to fetch the data
+                res = $MESSAGE.RESPONSE$OK;
+            }  else {
+                res = $MESSAGE.RESPONSE$FAIL;
+            }
             sendState();
-            res = $MESSAGE.RESPONSE$OK;
             // set modes
         } else if (equal($MESSAGE.REQUEST$SET_MODES, name)) {
-            // only array with full modes is supported
-            if (value.is<JsonArray>()) {
-                storage.getPortState().setModes(value.as<JsonArray>());
+            PortState &portState = storage.getPortState();
+            if (value.is<JsonObject>()) {
+                // object style data-set
+                char key[4];
+                for (int i = 0; i < $PORT.COUNT; ++i) {
+                    snprintf(key, 4, "%d", i);
+                    if (value[key].is<int>())
+                        portState.setPortMode(i, value[key].as<int>());
+                }
+                portHandler.pullState();
+                storage.backupState();
+                res = $MESSAGE.RESPONSE$OK;
+            } else if (value.is<JsonArray>()) {
+                // array style mode-set
+                portState.setModes(value.as<JsonArray>());
                 portHandler.pullState();
                 storage.backupState();
                 res = $MESSAGE.RESPONSE$OK;
             } else {
                 res = $MESSAGE.RESPONSE$FAIL;
             }
+            sendState();
         } else if (equal($MESSAGE.REQUEST$CONFIGURE_NETWORK, name)) {
             if (value.is<JsonObject>()) {
                 // connection config
                 storage.getConnectionConfiguration().updateFromJson(value.as<JsonObject>());
-                res = $MESSAGE.RESPONSE$OK;
                 storage.backupConfiguration();
                 doReboot = true;
+                res = $MESSAGE.RESPONSE$OK;
             } else {
                 res = $MESSAGE.RESPONSE$FAIL;
             }
@@ -112,15 +129,15 @@ int BaseClient::processRequest(const char* name, JsonVariant value, JsonArray re
             if (value.is<JsonObject>()) {
                 // server config
                 storage.getServerConfiguration().updateFromJson(value.as<JsonObject>());
-                res = $MESSAGE.RESPONSE$OK;
                 storage.backupConfiguration();
                 doReboot = true;
+                res = $MESSAGE.RESPONSE$OK;
             } else {
                 res = $MESSAGE.RESPONSE$FAIL;
             }
         } else if (equal($MESSAGE.REQUEST$REBOOT, name)) {
-            res = $MESSAGE.RESPONSE$OK;
             doReboot = true;
+            res = $MESSAGE.RESPONSE$OK;
         } else if (equal($MESSAGE.REQUEST$SEND_CONTROLLER_STATE, name)) {
             sendControllerState();
             res = $MESSAGE.RESPONSE$OK;
@@ -139,7 +156,7 @@ int BaseClient::processRequest(const char* name, JsonVariant value, JsonArray re
             } else {
                 res = $MESSAGE.RESPONSE$FAIL;
             }
-        } else if(equal($MESSAGE.REQUEST$SEND_STATE, name)) {
+        } else if (equal($MESSAGE.REQUEST$SEND_STATE, name)) {
             sendState();
             res = $MESSAGE.RESPONSE$OK;
         }
@@ -213,6 +230,6 @@ bool BaseClient::initialize() {
 }
 
 void BaseClient::reboot() {
-    //replace with RTOS-delayed task later
+    // replace with RTOS-delayed task later
     esp_restart();
 }
