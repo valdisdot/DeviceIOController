@@ -13,6 +13,7 @@ class PortState {
     JsonArrayConst getModesAsJson();
     void setModes(const int *modes);
     void setModes(JsonArrayConst modes);
+    void setPortMode(const int& port, int mode);
     void copyDataInto(int *destination);
     JsonArrayConst getDataAsJson();
     void setData(const int *data);

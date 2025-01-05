@@ -36,6 +36,13 @@ void PortState::setModes(JsonArrayConst modes) {
     }
 }
 
+void PortState::setPortMode(const int& port, int mode) {
+    if (port >= 0 && port < $PORT.COUNT) {
+        JsonArray modes = holder[JSON$STATE.MODES].as<JsonArray>();
+        modes[port] = mode;
+    }
+}
+
 void PortState::copyDataInto(int* destination) {
     if (destination) {
         JsonArray data = holder[JSON$STATE.DATA].as<JsonArray>();
