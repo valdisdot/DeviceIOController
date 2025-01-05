@@ -154,9 +154,9 @@ The response contains a `response` array of objects. Each object includes the re
     - `0` - request was `not executed` and was forvard as a log-message with `WARNING` level.
     - `-1` - request was `not known` and was forvard as a log-message with `ERROR` level.
 
-### List of available device request
+## List of available device request
 
-#### `set_modes`
+### `set_modes`
 
 Sets the port modes in the device. The request supports `value` as an `array` and as an `object`.  
 
@@ -192,7 +192,7 @@ The `value` must be provided as an `array`, where each index corresponds to a `p
 
 The `value` must be provided as an `object`, where each field name is treated as a `number` and mapped to a `port number`, while the corresponding field value is mapped to the `port mode`.
 
-#### `set_data`
+### `set_data`
 
 Sets the port data in the device. The request supports `value` as an `array` and as an `object`.  
 
@@ -229,7 +229,7 @@ The `value` must be provided as an `array`, where each index corresponds to a `p
 
 The `value` must be provided as an `object`, where each field name is treated as a `number` and mapped to a `port number`, while the corresponding field value is mapped to the `port data`.
 
-#### `configure_network`
+### `configure_network`
 
 Configures the network connection mode and its related settings for the device.  
 
@@ -263,7 +263,7 @@ The `value` for this request must be present as a `json-object`.
 - `apn_name` field represents the Access Point Name (APN) for the cellular connection.
 - `apn_user` and `apn_password` fields represent the username and password for authenticating the cellular connection to the Access Point Name (APN). These fields are optional for most modern operators but remain available for configurations requiring them.
 
-#### `configure_server`
+### `configure_server`
 
 Configures the server connection settings for the device.  
 
@@ -297,7 +297,7 @@ The `value` for this request must be present as a `json-object`.
 `password` - represents the password used for authentication.
 `certificate` - contains the SSL/TLS certificate for establishing a secure connection to the server.
 
-#### `configure_controller`
+### `configure_controller`
 
 Configures device settings as `log level` and `transmission interval`, determining `how frequently` the device will send `state data` to the server.
 
@@ -325,7 +325,7 @@ The `value` for this request must be present as a `json-object`.
   - `10` for `ERROR`.
 - `transmission_interval` configures the interval, in milliseconds, at which the device will send the port state.
 
-#### `send_state`
+### `send_state`
 
 Request to send the state of the ports (`state message`).
 
@@ -342,7 +342,7 @@ Request to send the state of the ports (`state message`).
 
 No `value` required for this type of `request`
 
-#### `send_controller_state`
+### `send_controller_state`
 
 Request to send the state of the controller (`controller state message`).
 
@@ -359,7 +359,7 @@ Request to send the state of the controller (`controller state message`).
 
 No `value` required for this type of `request`
 
-#### make_backup
+### make_backup
 
 Request trigger the device to `make a backup`, including configurations, port modes and data.
 
@@ -376,7 +376,7 @@ Request trigger the device to `make a backup`, including configurations, port mo
 
 No `value` required for this type of `request`
 
-#### reboot
+### reboot
 
 Request trigger the controller to make a `soft reboot`. The device will go thoght the initialization phase again, read all data from the internal memory, timestamp will be reset.
 
