@@ -22,24 +22,20 @@ Represents a state message. The message hold port `modes` and `data` in arrays, 
 {
   "timestamp": 30064,
   "modes": [
- ...
     1,
     0,
     1,
     1,
     3,
-    3,
- ...
+    3
   ],
   "data": [
- ...
     0,
     -1,
     0,
     1,
     2784,
-    148,
- ...
+    148
   ]
 }
 ```
@@ -99,7 +95,6 @@ Represents a log message. The message contains `log level` and three level of de
 - `message` represents a details or description.
 - `cause` hold additional information (buffers, json etc), can be `absent`.
 
-
 ### Request and response messages
 
 The main concept of execution the device commands being sent from a user is a *request-response* model. In common, user sends a message with a `user-defined message identifier` (or `message_id`) and an `array of requests`.
@@ -112,7 +107,6 @@ The main concept of execution the device commands being sent from a user is a *r
 {
   "message_id": 12345,
   "request": [
-    ...
     {
       "name": "request A name",
       "value": "request A value, array or object"
@@ -121,7 +115,6 @@ The main concept of execution the device commands being sent from a user is a *r
       "name": "request B name",
       "value": "request B value, array or object"
     }
-    ...
   ]
 }
 ```
@@ -135,13 +128,11 @@ After the `request` is processed, the device sends a `response` back to the user
 
 The response contains a `response` array of objects. Each object includes the request `name` and a digital representation of the execution `result`.  
 
-
 ```json
 {
   "timestamp": 567890,
   "message_id": 12345,
   "response": [
-    ...
     {
       "name": "request A name",
       "result": 1
@@ -150,7 +141,6 @@ The response contains a `response` array of objects. Each object includes the re
       "name": "request B name",
       "result": 0
     }
-    ...
   ]
 }
 ```
