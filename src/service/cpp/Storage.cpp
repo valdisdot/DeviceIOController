@@ -1,10 +1,10 @@
-#include "service/InternalStorage.h"
+#include "service/Storage.h"
 
-InternalStorage::InternalStorage(PortState& state, NetworkConfiguration& connectionConfiguration, ServerConfiguration& serverConfiguration, ControllerConfiguration& controllerConfiguration)
-    : state(state), connectionConfiguration(connectionConfiguration), serverConfiguration(serverConfiguration), controllerConfiguration(controllerConfiguration) {
+Storage::Storage(PortState& state, ControllerState& controllerState, NetworkConfiguration& connectionConfiguration, ServerConfiguration& serverConfiguration, ControllerConfiguration& controllerConfiguration)
+    : state(state), controllerState(controllerState), connectionConfiguration(connectionConfiguration), serverConfiguration(serverConfiguration), controllerConfiguration(controllerConfiguration) {
 }
 
-void InternalStorage::restoreConfiguration() {
+void Storage::restoreConfiguration() {
     preferences.begin($INTERNAL_STORAGE.CONFIGURATION);
     JsonVariant object;
     if (preferences.isKey($INTERNAL_STORAGE.CONFIGURATION$NETWORK)) {
@@ -28,7 +28,7 @@ void InternalStorage::restoreConfiguration() {
     preferences.end();
 }
 
-void InternalStorage::restoreState() {
+void Storage::restoreState() {
     preferences.begin($INTERNAL_STORAGE.STATE);
     JsonVariant array;
     if (preferences.isKey($INTERNAL_STORAGE.STATE$MODES)) {
@@ -46,7 +46,7 @@ void InternalStorage::restoreState() {
     preferences.end();
 }
 
-void InternalStorage::backupConfiguration() {
+void Storage::backupConfiguration() {
     preferences.begin($INTERNAL_STORAGE.CONFIGURATION);
     serializeJson(connectionConfiguration.getAsJson(), buffer, $SYSTEM.SIZE$1K);
     preferences.putString($INTERNAL_STORAGE.CONFIGURATION$NETWORK, buffer);
@@ -57,7 +57,7 @@ void InternalStorage::backupConfiguration() {
     preferences.end();
 }
 
-void InternalStorage::backupState() {
+void Storage::backupState() {
     preferences.begin($INTERNAL_STORAGE.STATE);
     serializeJson(state.getModesAsJson(), buffer, $SYSTEM.SIZE$1K);
     preferences.putString($INTERNAL_STORAGE.STATE$MODES, buffer);
@@ -66,7 +66,7 @@ void InternalStorage::backupState() {
     preferences.end();
 }
 
-void InternalStorage::erase() {
+void Storage::erase() {
     preferences.begin($INTERNAL_STORAGE.STATE);
     preferences.clear();
     preferences.end();
@@ -75,18 +75,22 @@ void InternalStorage::erase() {
     preferences.end();
 }
 
-PortState& InternalStorage::getPortState() {
+PortState& Storage::getPortState() {
     return state;
 }
 
-NetworkConfiguration& InternalStorage::getConnectionConfiguration() {
+ControllerState& Storage::getControllerState() {
+    return controllerState;
+}
+
+NetworkConfiguration& Storage::getConnectionConfiguration() {
     return connectionConfiguration;
 }
 
-ServerConfiguration& InternalStorage::getServerConfiguration() {
+ServerConfiguration& Storage::getServerConfiguration() {
     return serverConfiguration;
 }
 
-ControllerConfiguration& InternalStorage::getControllerConfiguration() {
+ControllerConfiguration& Storage::getControllerConfiguration() {
     return controllerConfiguration;
 }
