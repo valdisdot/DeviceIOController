@@ -1,11 +1,16 @@
-#define VERSION = 1.0
+#define VERSION = 1.1
 
-#include "system/Boot.h"
+#include "util/Runnable.h"
+#include "controller/Boot.h"
 
-Boot boot;
+Runnable *runnable = new Boot();
 
 void setup() {
-    boot.start();
+    runnable->init();
 }
 
-void loop(){}
+void loop() {
+    runnable->run();
+}
+
+
