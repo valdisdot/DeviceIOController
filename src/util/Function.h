@@ -1,11 +1,7 @@
-#ifndef MICRO_SYSTEM_H
-#define MICRO_SYSTEM_H
+#ifndef FUNCTION_H
+#define FUNCTION_H
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
-
-#include "system/Constant.h"
-#include "system/JsonSchema.h"
 
 /**
  * @brief Copies a string to the destination, overriding its contents.

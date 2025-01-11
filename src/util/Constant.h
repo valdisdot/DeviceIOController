@@ -157,7 +157,6 @@ struct MessageConstant {
     const int RESPONSE$FAIL = 0;
     /// Response code for undefined state.
     const int RESPONSE$UNDEFINED = -1;
-
     /// Request to set modes.
     const char* REQUEST$SET_MODES = "set_modes";
     /// Request to set data.

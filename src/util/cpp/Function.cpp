@@ -1,4 +1,4 @@
-#include "system/MicroSystem.h"
+#include "util/Function.h"
 
 void copyString(char* destination, const char* source, int limit) {
     if (limit == 0) {
