@@ -1,6 +1,6 @@
 This repository contains the source code for *the embedded side* of the **DeviceIO** project.
 
-**DeviceIO Controller: version 1.0**
+**DeviceIO Controller: version 1.1**
 
 ## Main concept
 
@@ -46,7 +46,7 @@ Represents a state message. The message hold port `modes` and `data` in arrays, 
   - `1` mode for `logical input`, meaning if the signal is present or not on the port, the `data` value is going to be `1` or `0` respectively.
   - `2` mode is `logical output`, otherwise the port state can be changed to the `low` or `high` value by a user with logical state of `0` or `1`, `data` value will hold the `last value`.
   - `3` mode is `values input`, meaning the voltage level of the port will be interpreted as an integer, the `data` value is going to be in range `from 0 to 4096`.
-  - `4` mode is `value output`, otherwise the port state can be changed by a user in a range `from 0 to 255` with respectful voltage level, `data` value will hold the `last value`.
+  - `4` mode is `value output`, otherwise the port state can be changed by a user in a range `from 0 to 4096` with respectful voltage level, `data` value will hold the `last value`.
   - `5` mode is `inversed logical input`, meaning if the signal is present (0) or not (1) on the port, the `data` value is going to be `1` or `0` respectively as for the `logical input` (useful for mechanical buttons).
   - `6` mode is `stateful logical input`, meaning the device will hold the last state of the port and inverse the saved value if the port's state changes, otherwise `data` value will be `n%2`, where `n is port state changes count` (useful for stateful buttons, clicker). User can also change the value in this mode as the `logical output`.
   - `10` mode is `forbidden to use`, act as the same as the `not initialized`, but shows the `intention` of not to use the port, `data` value always will be `-1`.
@@ -166,7 +166,7 @@ Sets the port modes in the device. The request supports `value` as an `array` an
   "request": [
     {
       "name": "set_modes",
-      "value": [0, 0, 0, 1, 0, 2, 2, 3, 3, ..., 10]
+      "value": [0, 0, 0, 1, 0, 2, 2, 3, 3, 10]
     }
   ]
 }
@@ -202,7 +202,7 @@ Sets the port data in the device. The request supports `value` as an `array` and
   "request": [
     {
       "name": "set_data",
-      "value": [0, 0, 0, 1, 0, 100, 1, 0, 0, ..., 0]
+      "value": [0, 0, 0, 1, 0, 100, 1, 0, 0, 0]
     }
   ]
 }
@@ -359,7 +359,7 @@ Request to send the state of the controller (`controller state message`).
 
 No `value` required for this type of `request`
 
-### make_backup
+### `make_backup`
 
 Request trigger the device to `make a backup`, including configurations, port modes and data.
 
@@ -376,7 +376,7 @@ Request trigger the device to `make a backup`, including configurations, port mo
 
 No `value` required for this type of `request`
 
-### reboot
+### `reboot`
 
 Request trigger the controller to make a `soft reboot`. The device will go thoght the initialization phase again, read all data from the internal memory, timestamp will be reset.
 
@@ -392,3 +392,48 @@ Request trigger the controller to make a `soft reboot`. The device will go thogh
 ```
 
 No `value` required for this type of `request`
+
+
+## Connectors and Device Identifier
+
+The device operates with messages and data exchange via `Connectors`. All data formats are consistent across all connector types. The user implements the data exchange logic and processes the data on their own side.
+
+Each device has an `id`, which is calculated from the device's WiFi `MAC address` (currently, by performing an XOR operation on each MAC byte). In order to communicate with a device, the user must know its id.
+
+ID computation pseudo-code:
+
+```pseudo
+int mac_base[6];
+put_mac_address(mac_base);
+for(int i = 0; i < 6; ++i) 
+    mac_base[i] = mac_base[i] ^ 127;
+buffer = new char[32];
+snprintf(buffer, "%d%d%d%d%d%d", mac_base);
+```
+
+### Supported connector types
+
+1. **SerialConnector**
+    - Transmits data via a serial connection on `HardwareSerial1` at a baud rate of `38400`.
+    - Messages are flushed into the serial connection with a delimiter `
+#END#
+` to help the user distinguish between messages.
+    - This is the `default connector`. The device switches to this mode if any initialization error occurs.
+
+    On the first run, the serial connection is *soft-locked*. You must send the `device id` to unlock it.
+
+    The user is responsible for implementing the logic for sending and receiving requests/data to the device via the serial connection. The device will periodically check for incoming data and respond to requests.
+
+2. **MqttConnector**
+    - Transmits data via an `MQTT broker` (using the `Client` class). Currently, `WiFiClient` and `WiFiClientSecure` are supported.
+    - The user configures this type of connector through `configure_network` and `configure_server` requests.
+
+    The user must implement the data processing logic. The device simply exchanges data with the `MQTT broker` using specific `topics`.
+
+Topic List:
+
+- `from/{$id}/state` - device publishes its `port state`.
+- `from/{$id}/controller` - device publishes its `controller state`.
+- `from/{$id}/log` - device publishes `logs`.
+- `to/{$id}/request` - device subscribes to this topic to process `requests`.
+- `from/{$id}/response` - device publishes `responses` to request processing.
