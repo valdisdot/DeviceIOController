@@ -58,9 +58,9 @@ void PortHandler::pullData() {
                 value = temp[i] > 0 ? HIGH : LOW;
                 digitalWrite(i, value);
             } else if (modes[i] == $PORT.MODE$VALUE_OUTPUT) {
-                value = temp[i] < 0 ? 0 : temp[i] > 255 ? 255
-                                                        : temp[i];
-                analogWrite(i, value);
+                value = temp[i] < 0 ? 0 : temp[i] > 4096 ? 4096
+                                                         : temp[i];
+                analogWrite(i, value / 4096 * 255);
             } else
                 value = temp[i] > 0 ? HIGH : LOW;
             data[i] = value;
