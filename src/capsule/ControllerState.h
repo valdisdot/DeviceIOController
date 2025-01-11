@@ -1,7 +1,10 @@
 #ifndef CONTROLLER_STATE_H
 #define CONTROLLER_STATE_H
 
-#include "system/MicroSystem.h"
+#include "util/Constant.h"
+#include "util/JsonSchema.h"
+#include "util/Function.h"
+#include <ArduinoJson.h>
 
 class ControllerState {
    private:

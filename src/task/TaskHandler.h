@@ -4,7 +4,9 @@
 #include <atomic>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "system/MicroSystem.h"
+#include "util/Constant.h"
+#include "util/JsonSchema.h"
+#include "util/Function.h"
 #include "task/Task.h"
 
 class TaskHandler {

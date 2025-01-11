@@ -1,15 +1,19 @@
 #ifndef PORT_HANDLER_H
 #define PORT_HANDLER_H
 
-#include "system/MicroSystem.h"
+#include <ArduinoJson.h>
+
 #include "capsule/PortState.h"
+#include "util/Constant.h"
+#include "util/Function.h"
+#include "util/JsonSchema.h"
 
 class PortHandler {
    private:
     PortState &state;
-    int *data;                    
-    int *modes;                     
-    int *statefulData;                   
+    int *data;
+    int *modes;
+    int *statefulData;
 
     void collectStatefulData(int port);
     void collectData();

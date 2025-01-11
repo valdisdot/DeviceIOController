@@ -1,7 +1,10 @@
 #ifndef SERVER_CONFIGURATION_H
 #define SERVER_CONFIGURATION_H
 
-#include "system/MicroSystem.h"
+#include "util/Constant.h"
+#include "util/JsonSchema.h"
+#include "util/Function.h"
+#include <ArduinoJson.h>
 
 class ServerConfiguration {
    private:

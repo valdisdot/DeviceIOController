@@ -1,7 +1,9 @@
 #ifndef TASK_H
 #define TASK_H
 
-#include "system/MicroSystem.h"
+#include "util/Constant.h"
+#include "util/JsonSchema.h"
+#include "util/Function.h"
 
 class Task {
    protected:
