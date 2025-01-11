@@ -1,11 +1,13 @@
 #ifndef CONTROLLER_TASKS_H
 #define CONTROLLER_TASKS_H
 
-#include "system/MicroSystem.h"
+#include "util/Constant.h"
+#include "util/JsonSchema.h"
+#include "util/Function.h"
 #include "task/Task.h"
-#include "client/BaseClient.h"
+#include "controller/MessageExchanger.h"
 #include "service/PortHandler.h"
-#include "service/InternalStorage.h"
+#include "service/Storage.h"
 #include <WiFi.h>
 
 class PortHandlerStatefulCollectorTask : public Task {
@@ -19,31 +21,11 @@ class PortHandlerStatefulCollectorTask : public Task {
 
 class BackupTask : public Task {
    private:
-    InternalStorage& storage; 
+    Storage& storage; 
 
    public:
-    BackupTask(InternalStorage& storage);
+    BackupTask(Storage& storage);
     void execute() override;
-};
-
-class ClientRunnerTask : public Task {
-   private:
-    BaseClient& client;
-
-   public:
-    ClientRunnerTask(BaseClient& client);
-
-    void execute() override;
-};
-
-class MemoryCollector : public Task {
-    private:
-    ControllerState& controllerState;
-
-    public:
-    MemoryCollector(ControllerState& controllerState);
-
-    void execute() override;  
 };
 
 class WiFiSignalStrengthCollector : public Task {
